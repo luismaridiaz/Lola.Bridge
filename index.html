@@ -1,0 +1,1366 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0f0f1a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Lola">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Lola · Bridge Mentor</title>
+<link id="manifestLink" rel="manifest" href="">
+<link id="touchIcon" rel="apple-touch-icon" href="">
+<style>
+  :root{
+    --bg:#0f0f1a; --bg2:#1a1a2e; --panel:#20203a; --panel2:#262646;
+    --border:#33335a; --text:#f2f2f7; --muted:#9a9ac0;
+    --accent:#e0577a; --accent2:#8a5cf0; --gold:#f4c95d; --green:#4ade80; --red:#f87171;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    background:linear-gradient(160deg,#0f0f1a,#191933 60%,#12121f);
+    color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    overflow-x:hidden;
+  }
+  #app{max-width:720px;margin:0 auto;padding:14px 14px 90px 14px; min-height:100vh;}
+  header.top{display:flex;align-items:center;justify-content:space-between;padding:6px 2px 14px 2px;}
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand .logo{
+    width:38px;height:38px;border-radius:12px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;
+    box-shadow:0 4px 14px rgba(224,87,122,.35);
+  }
+  .brand h1{font-size:20px;margin:0;font-weight:800;letter-spacing:.3px;}
+  .brand p{margin:0;font-size:11px;color:var(--muted);}
+  .elo-chip{background:var(--panel);border:1px solid var(--border);padding:6px 12px;border-radius:999px;font-size:12px;}
+  .elo-chip b{color:var(--gold);}
+
+  nav.tabs{display:flex;gap:6px;background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:5px;margin-bottom:16px;}
+  nav.tabs button{
+    flex:1;padding:10px 6px;border:none;border-radius:12px;background:transparent;color:var(--muted);
+    font-size:13px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:2px;
+  }
+  nav.tabs button.active{background:linear-gradient(135deg,var(--accent2),var(--accent));color:#fff;box-shadow:0 4px 14px rgba(138,92,240,.3);}
+
+  .card-panel{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:16px;margin-bottom:14px;}
+  .card-panel h3{margin:0 0 10px 0;font-size:14px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+  .row-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+  .stat-box{background:var(--panel2);border-radius:14px;padding:10px;text-align:center;}
+  .stat-box .v{font-size:17px;font-weight:800;}
+  .stat-box .l{font-size:10px;color:var(--muted);margin-top:2px;}
+
+  .btn{border:none;border-radius:14px;padding:12px 16px;font-weight:700;font-size:14px;cursor:pointer;color:#fff;}
+  .btn-primary{background:linear-gradient(135deg,var(--accent2),var(--accent));box-shadow:0 4px 14px rgba(138,92,240,.3);}
+  .btn-secondary{background:var(--panel2);border:1px solid var(--border);color:var(--text);}
+  .btn-danger{background:rgba(248,113,113,.15);color:var(--red);border:1px solid rgba(248,113,113,.3);}
+  .btn-row{display:flex;gap:8px;flex-wrap:wrap;}
+  .btn[disabled]{opacity:.35;cursor:default;}
+
+  .hand-row{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;min-height:70px;}
+  .pcard{
+    width:44px;height:62px;background:#fdfdfd;border-radius:9px;position:relative;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    box-shadow:0 3px 8px rgba(0,0,0,.35);font-weight:800;font-size:13px;border:none;
+  }
+  .pcard.red{color:#d1274a;} .pcard.black{color:#1a1a2e;}
+  .pcard .sfx{font-size:19px;line-height:1;margin-top:1px;}
+  .pcard.disabled{opacity:.35;}
+  .suit-label{font-size:10px;color:var(--muted);margin:8px 0 2px 2px;}
+
+  .table-wrap{background:radial-gradient(ellipse at center,#1c3d2c,#0f2318);border-radius:20px;padding:16px;border:1px solid #2a4a37;}
+  .compass{display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:auto auto auto;gap:6px;align-items:center;justify-items:center;margin-bottom:10px;}
+  .compass .n{grid-column:2;grid-row:1;} .compass .w{grid-column:1;grid-row:2;}
+  .compass .mid{grid-column:2;grid-row:2;} .compass .e{grid-column:3;grid-row:2;} .compass .s{grid-column:2;grid-row:3;}
+  .seat-label{font-size:10px;color:#8fd6a8;font-weight:700;}
+  .trick-slot{width:34px;height:48px;border-radius:6px;background:rgba(255,255,255,.06);border:1px dashed rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:11px;color:#8fd6a8;}
+  .trick-slot.filled{background:#fdfdfd;border:none;color:#1a1a2e;font-weight:800;}
+  .trick-slot.filled.red{color:#d1274a;}
+
+  .badge{display:inline-block;background:var(--panel2);border-radius:999px;padding:3px 10px;font-size:11px;color:var(--muted);}
+  .contract-picker{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+  .pill{padding:8px 12px;border-radius:12px;border:1px solid var(--border);background:var(--panel2);font-size:13px;color:var(--muted);}
+  .pill.selected{background:linear-gradient(135deg,var(--accent2),var(--accent));color:#fff;border-color:transparent;}
+
+  .toggle{width:44px;height:24px;border-radius:999px;background:var(--panel2);border:1px solid var(--border);position:relative;padding:2px;}
+  .toggle .dot{width:18px;height:18px;border-radius:999px;background:var(--muted);transition:.2s;}
+  .toggle.on{background:linear-gradient(135deg,var(--accent2),var(--accent));}
+  .toggle.on .dot{background:#fff;transform:translateX(20px);}
+
+  input[type=text]{width:100%;background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:10px 12px;color:var(--text);font-size:14px;}
+  label.fieldlabel{font-size:12px;color:var(--muted);display:block;margin:10px 0 4px 0;}
+
+  .center-msg{text-align:center;padding:30px 10px;}
+  .center-msg .emoji{font-size:44px;}
+  canvas{width:100%;height:140px;}
+  footer.note{text-align:center;font-size:10px;color:var(--muted);margin-top:14px;opacity:.7;}
+  .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--panel2);border:1px solid var(--border);padding:10px 18px;border-radius:12px;font-size:13px;z-index:50;box-shadow:0 8px 24px rgba(0,0,0,.4);max-width:88vw;text-align:center;}
+  .hist-line{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;cursor:pointer;}
+  .detail-box{background:var(--panel2);border-radius:12px;padding:10px;margin:6px 0 12px 0;font-size:11.5px;color:#dcdcf0;line-height:1.5;}
+  .ach-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px;}
+  .ach-box{background:var(--panel2);border-radius:12px;padding:10px;text-align:center;}
+  .ach-box .ic{font-size:22px;}
+  .ach-box .nm{font-size:10px;margin-top:4px;color:var(--muted);}
+  .theme-btn{width:38px;height:38px;border-radius:12px;background:var(--panel2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:17px;cursor:pointer;color:var(--text);flex-shrink:0;}
+
+  body.theme-light{
+    --bg:#f4f5fb; --bg2:#eceefa; --panel:#ffffff; --panel2:#eef0fa;
+    --border:#dcdce8; --text:#1a1a2e; --muted:#6a6a8a;
+    background:linear-gradient(160deg,#f4f5fb,#e9ebf5 60%,#f0f1f8);
+    color:#1a1a2e;
+  }
+  body.theme-light .table-wrap{background:radial-gradient(ellipse at center,#dff3e6,#c9ead9);border:1px solid #b7dcc6;}
+  body.theme-light .trick-slot{background:rgba(0,0,0,.05);border:1px dashed rgba(0,0,0,.15);color:#2f7a4d;}
+  body.theme-light .trick-slot.filled{background:#ffffff;color:#1a1a2e;}
+  body.theme-light .detail-box{color:#33334d;}
+  body.theme-light .seat-label{color:#2f7a4d;}
+  body.theme-light .pcard.disabled{opacity:.45;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toastHost"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============ CONSTANTS ============ */
+var SUITS = ['♠','♥','♦','♣'];
+var STRAIN_ORDER = ['♣','♦','♥','♠','NT'];
+var RANKS = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+var SEATS = ['N','E','S','W'];
+var SEAT_NAMES = {N:'Norte', E:'Este', S:'Sur (tú)', W:'Oeste'};
+
+var LS_PROFILE = 'lola_bridge_profile';
+var LS_GAMES = 'lola_bridge_games';
+
+/* ============ DECK / HAND UTILS ============ */
+function createDeck(){
+  var deck = [];
+  for (var s=0;s<SUITS.length;s++){
+    for (var r=0;r<RANKS.length;r++){
+      deck.push({suit:SUITS[s], rank:RANKS[r], value:r+2});
+    }
+  }
+  return deck;
+}
+function shuffle(deck){
+  var d = deck.slice();
+  for (var i=d.length-1;i>0;i--){
+    var j = Math.floor(Math.random()*(i+1));
+    var t=d[i]; d[i]=d[j]; d[j]=t;
+  }
+  return d;
+}
+function sortHand(hand){
+  return hand.slice().sort(function(a,b){
+    if (a.suit !== b.suit) return SUITS.indexOf(a.suit) - SUITS.indexOf(b.suit);
+    return b.value - a.value;
+  });
+}
+function dealHands(){
+  var d = shuffle(createDeck());
+  return {
+    N: sortHand(d.slice(0,13)),
+    E: sortHand(d.slice(13,26)),
+    S: sortHand(d.slice(26,39)),
+    W: sortHand(d.slice(39,52))
+  };
+}
+function generateConstrainedHand(mode){
+  var attempts = 0;
+  while (attempts < 4000){
+    attempts++;
+    var deck = shuffle(createDeck());
+    var southRaw = deck.slice(0,13);
+    var south = sortHand(southRaw);
+    var hcp = calcHCP(south);
+    var counts = SUITS.map(function(s){ return suitCount(south,s); });
+    var maxSuit = Math.max.apply(null, counts);
+    var balanced = counts.every(function(c){return c>=2 && c<=5;}) &&
+                   counts.filter(function(c){return c===5;}).length<=1 &&
+                   counts.filter(function(c){return c<=2;}).length===0;
+    var ok = true;
+    if (mode==='strong') ok = hcp>=15 && hcp<=17 && balanced;
+    else if (mode==='long') ok = maxSuit>=6;
+    else if (mode==='slam') ok = hcp>=20;
+    else if (mode==='weak') ok = hcp<=7;
+    if (ok){
+      var rest = deck.slice(13);
+      return {
+        S: south,
+        N: sortHand(rest.slice(0,13)),
+        E: sortHand(rest.slice(13,26)),
+        W: sortHand(rest.slice(26,39))
+      };
+    }
+  }
+  return dealHands();
+}
+function calcHCP(hand){
+  var pts = {A:4,K:3,Q:2,J:1};
+  var total = 0;
+  for (var i=0;i<hand.length;i++){ total += pts[hand[i].rank] || 0; }
+  return total;
+}
+function suitCount(hand, suit){
+  var c=0; for (var i=0;i<hand.length;i++){ if (hand[i].suit===suit) c++; } return c;
+}
+function cardStr(c){ return c.rank + c.suit; }
+function deepClone(o){ return JSON.parse(JSON.stringify(o)); }
+function partnerOf(seat){ return {N:'S',S:'N',E:'W',W:'E'}[seat]; }
+function partnershipOf(seat){ return (seat==='N'||seat==='S') ? 'NS' : 'EW'; }
+function nextSeatCW(seat){ return SEATS[(SEATS.indexOf(seat)+1)%4]; }
+
+/* ============ BIDDING ============ */
+function suggestOpeningBidObj(hand){
+  var hcp = calcHCP(hand);
+  var counts = SUITS.map(function(s){ return {suit:s, count:suitCount(hand,s)}; });
+  var longest = counts.reduce(function(a,b){ return b.count>a.count?b:a; });
+  var balanced = counts.every(function(c){ return c.count>=2 && c.count<=5; }) &&
+                 counts.filter(function(c){return c.count===5;}).length<=1 &&
+                 counts.filter(function(c){return c.count<=2;}).length===0;
+  if (hcp>=15 && hcp<=17 && balanced) return {level:1, suit:'NT'};
+  if (hcp>=20 && hcp<=21 && balanced) return {level:2, suit:'NT'};
+  if (hcp>=22) return {level:2, suit:'♣'};
+  if (hcp>=12 && hcp<=19 && longest.count>=5) return {level:1, suit:longest.suit};
+  if (hcp>=12 && hcp<=19) return {level:1, suit:'♣'};
+  return null;
+}
+function suggestOpeningBid(hand){
+  var o = suggestOpeningBidObj(hand);
+  return o ? (o.level + o.suit) : 'PASO';
+}
+function aiRespondToBid(hand, partnerBid){
+  var hcp = calcHCP(hand);
+  if (partnerBid.suit !== 'NT'){
+    var support = suitCount(hand, partnerBid.suit);
+    if (support>=4 && hcp>=6 && hcp<=10) return {level:partnerBid.level+1, suit:partnerBid.suit};
+    if (support>=4 && hcp>=11 && hcp<=14) return {level:partnerBid.level+2, suit:partnerBid.suit};
+    if (support>=3 && hcp>=15) return {level:partnerBid.level+3, suit:partnerBid.suit};
+  }
+  var newSuits = SUITS.map(function(s){return {suit:s, count:suitCount(hand,s)};})
+    .filter(function(c){ return c.count>=4 && c.suit!==partnerBid.suit; })
+    .sort(function(a,b){ return b.count-a.count; });
+  if (hcp>=6 && newSuits.length) return {level:partnerBid.level, suit:newSuits[0].suit};
+  if (hcp>=6 && hcp<=9) return {level:1, suit:'NT'};
+  if (hcp>=10 && hcp<=12) return {level:2, suit:'NT'};
+  if (hcp>=13) return {level:3, suit:'NT'};
+  return null;
+}
+function bidRank(bid){ return bid.level*5 + STRAIN_ORDER.indexOf(bid.suit); }
+function aiDecideBid(seat, hand){
+  var g = state.game;
+  var highestEntry = null;
+  for (var i=g.auctionHistory.length-1;i>=0;i--){
+    if (g.auctionHistory[i].bid !== 'PASS'){ highestEntry = g.auctionHistory[i]; break; }
+  }
+  var partner = partnerOf(seat);
+  var ownBidExists = g.auctionHistory.some(function(e){
+    return e.bid !== 'PASS' && e.seat === seat;
+  });
+  var candidate = null;
+  if (!ownBidExists && highestEntry && highestEntry.seat === partner){
+    candidate = aiRespondToBid(hand, highestEntry.bid);
+  } else if (!ownBidExists && !highestEntry){
+    candidate = suggestOpeningBidObj(hand);
+  } else if (!ownBidExists && highestEntry && partnershipOf(highestEntry.seat) !== partnershipOf(seat)){
+    candidate = suggestOpeningBidObj(hand);
+  }
+  if (!candidate) return 'PASS';
+  candidate.level = Math.min(candidate.level, 7);
+  var rank = highestEntry ? bidRank(highestEntry.bid) : -1;
+  while (bidRank(candidate) <= rank && candidate.level < 7){ candidate.level++; }
+  if (bidRank(candidate) <= rank) return 'PASS';
+  return candidate;
+}
+
+/* ============ SCORING ============ */
+function isMajor(suit){ return suit==='♥' || suit==='♠'; }
+function trickValue(suit){ if (suit==='NT') return 30; return isMajor(suit) ? 30 : 20; }
+function computeScore(level, suit, tricksWon, vulnerable){
+  var needed = level+6;
+  var made = tricksWon>=needed;
+  if (!made){
+    var down = needed - tricksWon;
+    var per = vulnerable ? 100 : 50;
+    return -1 * down * per;
+  }
+  var base = level*trickValue(suit) + (suit==='NT' ? 10 : 0);
+  var overtricks = tricksWon - needed;
+  var total = base + overtricks*trickValue(suit);
+  total += (base>=100) ? (vulnerable?500:300) : 50;
+  if (level===6) total += vulnerable?750:500;
+  if (level===7) total += vulnerable?1500:1000;
+  return total;
+}
+
+/* ============ AI CARD PLAY ============ */
+function getValidMoves(hand, trickCards, trump){
+  if (trickCards.length===0) return hand;
+  var leadSuit = trickCards[0].card.suit;
+  var inSuit = hand.filter(function(c){ return c.suit===leadSuit; });
+  return inSuit.length ? inSuit : hand;
+}
+function trickWinner(trickCards, trump){
+  var leadSuit = trickCards[0].card.suit;
+  var best = trickCards[0];
+  for (var i=1;i<trickCards.length;i++){
+    var cur = trickCards[i];
+    var c = cur.card, w = best.card;
+    var cIsTrump = trump!=='NT' && c.suit===trump;
+    var wIsTrump = trump!=='NT' && w.suit===trump;
+    if (cIsTrump && !wIsTrump){ best = cur; }
+    else if (cIsTrump && wIsTrump && c.value>w.value){ best = cur; }
+    else if (!cIsTrump && !wIsTrump && c.suit===leadSuit && c.value>w.value){ best = cur; }
+  }
+  return best;
+}
+function aiChooseCard(hand, trickCards, trump){
+  var valid = getValidMoves(hand, trickCards, trump);
+  if (trickCards.length===0){
+    var counts = SUITS.map(function(s){return {suit:s,count:suitCount(hand,s)};})
+      .filter(function(c){return c.count>0;})
+      .sort(function(a,b){ return b.count-a.count; });
+    var leadSuit = counts[0] ? counts[0].suit : hand[0].suit;
+    var opts = hand.filter(function(c){return c.suit===leadSuit;}).sort(function(a,b){return a.value-b.value;});
+    return opts[0];
+  }
+  var position = trickCards.length;
+  var canWin = valid.filter(function(c){
+    var trial = trickCards.concat([{seat:'x',card:c}]);
+    return trickWinner(trial, trump).card === c;
+  });
+  var sorted = valid.slice().sort(function(a,b){return a.value-b.value;});
+  if (position===3){
+    if (canWin.length){ canWin.sort(function(a,b){return a.value-b.value;}); return canWin[0]; }
+    return sorted[0];
+  }
+  if (position===1){
+    if (canWin.length && canWin[0].value===sorted[0].value){ return canWin[0]; }
+    return sorted[0];
+  }
+  if (canWin.length){ canWin.sort(function(a,b){return a.value-b.value;}); return canWin[0]; }
+  return sorted[sorted.length-1];
+}
+
+/* ============ AUDIO ============ */
+var AudioCtx = window.AudioContext || window.webkitAudioContext;
+var actx = null;
+function beep(freq, dur, type){
+  var st = getSettings();
+  if (!st.sound) return;
+  try{
+    if (!actx) actx = new AudioCtx();
+    var o = actx.createOscillator();
+    var g = actx.createGain();
+    o.type = type || 'sine';
+    o.frequency.value = freq;
+    g.gain.value = 0.06;
+    o.connect(g); g.connect(actx.destination);
+    o.start();
+    g.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + dur);
+    o.stop(actx.currentTime + dur);
+  }catch(e){}
+}
+function playCardSound(){ beep(520,0.09,'triangle'); }
+function playWinSound(){ beep(660,0.12); setTimeout(function(){beep(880,0.18);},120); }
+function playLoseSound(){ beep(300,0.16,'sawtooth'); setTimeout(function(){beep(220,0.22,'sawtooth');},140); }
+
+/* ============ STORAGE ============ */
+function getProfile(){
+  try{
+    var p = JSON.parse(localStorage.getItem(LS_PROFILE));
+    if (p) return p;
+  }catch(e){}
+  var def = {name:'Jugador', elo:1200, streak:0, bestStreak:0, createdAt:new Date().toISOString(), settings:{sound:true, theme:'dark', coach:true}};
+  localStorage.setItem(LS_PROFILE, JSON.stringify(def));
+  return def;
+}
+function saveProfile(p){ localStorage.setItem(LS_PROFILE, JSON.stringify(p)); }
+function getSettings(){ return getProfile().settings || {sound:true}; }
+function coachEnabled(){ var s=getSettings(); return s.coach!==false; }
+function bidToStr(bid){ return bid==='PASS' ? 'pasar' : (bid.level+bid.suit); }
+function bidsEqual(a,b){
+  if (a==='PASS' && b==='PASS') return true;
+  if (a==='PASS' || b==='PASS') return false;
+  return a.level===b.level && a.suit===b.suit;
+}
+function coachCardReason(position, recommended, g){
+  var base;
+  if (position===0) base = 'al salir conviene sacar una carta baja del palo más largo';
+  else if (position===1) base = 'en segunda posición, si no puedes ganar barato, juega baja ("segunda mano baja")';
+  else if (position===2) base = 'en tercera posición conviene jugar alto para intentar ganar la baza ("tercera mano alta")';
+  else base = 'en última posición, gana la baza lo más barato posible si puedes';
+  var msg = 'Lola (coach): '+base+'. Sugerida: '+cardStr(recommended)+'.';
+  if (!g || !g.declarer) return msg;
+
+  // Solo tiene sentido combinar manos si quien pide la pista es declarante o el muerto
+  // (mismo bando); un defensor no comparte mano con el muerto del rival.
+  var partnerSeat = null;
+  if (g.turn === g.declarer) partnerSeat = g.dummy;
+  else if (g.turn === g.dummy) partnerSeat = g.declarer;
+  if (!partnerSeat || partnerSeat === g.turn) return msg;
+
+  var hand = g.hands[g.turn] || [];
+  var partnerHand = g.hands[partnerSeat] || [];
+  var combined = hand.concat(partnerHand);
+  var finesseSuits = [];
+  SUITS.forEach(function(s){
+    if (s === g.trump) return;
+    var cards = combined.filter(function(c){ return c.suit===s; });
+    var hasA = cards.some(function(c){ return c.rank==='A'; });
+    var hasQ = cards.some(function(c){ return c.rank==='Q'; });
+    var hasK = cards.some(function(c){ return c.rank==='K'; });
+    if (hasA && hasQ && !hasK) finesseSuits.push(s);
+  });
+  if (finesseSuits.length){
+    msg += ' Posición de finesse (As+Dama sin Rey) en: '+finesseSuits.join(', ')+'.';
+  }
+  return msg;
+}
+var RANK_ORDER_DESC = ['A','K','Q','J','10','9','8','7','6','5','4','3','2'];
+function combinedTopTricks(hands, seatA, seatB){
+  var combo = hands[seatA].concat(hands[seatB]);
+  var bySuit = {}; var total = 0;
+  SUITS.forEach(function(s){
+    var have = {};
+    combo.filter(function(c){ return c.suit===s; }).forEach(function(c){ have[c.rank] = true; });
+    var count = 0;
+    for (var i=0;i<RANK_ORDER_DESC.length;i++){
+      if (have[RANK_ORDER_DESC[i]]) count++; else break;
+    }
+    bySuit[s] = count;
+    total += count;
+  });
+  return {bySuit:bySuit, total:total};
+}
+function detectFinesses(hands, seatA, seatB, trump){
+  var combo = hands[seatA].concat(hands[seatB]);
+  var found = [];
+  SUITS.forEach(function(s){
+    if (s===trump) return;
+    var cards = combo.filter(function(c){ return c.suit===s; });
+    var hasA = cards.some(function(c){ return c.rank==='A'; });
+    var hasQ = cards.some(function(c){ return c.rank==='Q'; });
+    var hasK = cards.some(function(c){ return c.rank==='K'; });
+    if (hasA && hasQ && !hasK) found.push(s);
+  });
+  return found;
+}
+function buildHandInsights(g){
+  if (g.declarerSide!=='NS' || !g.initialHands) return null;
+  var tt = combinedTopTricks(g.initialHands, g.declarer, g.dummy);
+  var finesses = detectFinesses(g.initialHands, g.declarer, g.dummy, g.trump);
+  var lines = ['Bazas seguras estimadas al reparto (contando solo secuencias de honores desde arriba, sin desarrollar palos): '+tt.total+'.'];
+  if (finesses.length){
+    lines.push('Posición de finesse (As y Dama sin el Rey) en: '+finesses.join(', ')+'.');
+  }
+  return lines.join(' ');
+}
+function renderFullAnalysisPanel(g){
+  var declarerTricks = g.tricksWon.N + g.tricksWon.S;
+  var needed = g.level + 6;
+  var made = declarerTricks >= needed;
+  var tt = combinedTopTricks(g.initialHands, g.declarer, g.dummy);
+  var finesses = detectFinesses(g.initialHands, g.declarer, g.dummy, g.trump);
+  var panel = el('div',{class:'card-panel'});
+  panel.appendChild(el('h3',{},[txt('📊 Análisis completo')]));
+  panel.appendChild(el('p',{style:'font-size:11.5px;color:var(--muted);margin-top:-4px;'},[
+    txt('Basado en el reparto original de '+SEAT_NAMES[g.declarer].split(' ')[0]+' y '+SEAT_NAMES[g.dummy].split(' ')[0]+'. Estimación de libro de iniciación, no un cálculo exacto de la mano tal y como se jugó.')
+  ]));
+  panel.appendChild(el('p',{style:'font-size:13px;'},[
+    txt('Contrato '+g.contract+': '+(made?'cumplido':'caído')+' ('+declarerTricks+'/'+needed+' bazas).')
+  ]));
+  var suitRow = el('div',{class:'row-stats'});
+  SUITS.forEach(function(s){
+    suitRow.appendChild(statBox(tt.bySuit[s], s+(s===g.trump?' (triunfo)':'')));
+  });
+  panel.appendChild(suitRow);
+  panel.appendChild(el('p',{style:'font-size:13px;margin-top:8px;'},[
+    txt('Total de bazas seguras estimadas al reparto: '+tt.total+'.')
+  ]));
+  if (finesses.length){
+    panel.appendChild(el('p',{style:'font-size:13px;'},[txt('Finesse (As+Dama sin Rey) en: '+finesses.join(', ')+'.')]));
+  } else {
+    panel.appendChild(el('p',{style:'font-size:13px;color:var(--muted);'},[txt('No se detectan posiciones de finesse claras (As+Dama sin Rey) en palos que no sean triunfo.')]));
+  }
+  panel.appendChild(el('p',{style:'font-size:11.5px;color:var(--muted);margin-top:8px;'},[
+    txt('Consejo general: si tienes el control, saca los triunfos pronto; desarrolla cuanto antes tu palo más largo para convertir cartas bajas en bazas.')
+  ]));
+  return panel;
+}
+function getGames(){
+  try{ return JSON.parse(localStorage.getItem(LS_GAMES)) || []; }catch(e){ return []; }
+}
+function saveGames(g){ localStorage.setItem(LS_GAMES, JSON.stringify(g)); }
+function addGame(game){
+  var games = getGames();
+  games.unshift(game);
+  if (games.length>200) games = games.slice(0,200);
+  saveGames(games);
+  var p = getProfile();
+  p.elo = Math.max(700, p.elo + (game.userWon ? 15 : -10));
+  p.streak = game.userWon ? (p.streak||0)+1 : 0;
+  p.bestStreak = Math.max(p.bestStreak||0, p.streak);
+  saveProfile(p);
+}
+function getAchievements(games, profile){
+  var wins = games.filter(function(g){return g.userWon;});
+  var slams = games.filter(function(g){return g.declarerSide==='NS' && g.result==='MAKE' && g.level>=6;});
+  var defends = games.filter(function(g){return g.declarerSide==='EW' && g.result==='DOWN';});
+  return [
+    {icon:'🎯', name:'Primera partida', unlocked: games.length>=1},
+    {icon:'🔟', name:'10 partidas', unlocked: games.length>=10},
+    {icon:'🏆', name:'Primera victoria', unlocked: wins.length>=1},
+    {icon:'🔥', name:'Racha de 3', unlocked: (profile.bestStreak||0)>=3},
+    {icon:'💎', name:'Slam cumplido', unlocked: slams.length>=1},
+    {icon:'🛡️', name:'Buena defensa', unlocked: defends.length>=1}
+  ];
+}
+
+/* ============ APP STATE ============ */
+var state = { tab:'game', toastTimer:null, game:null, practiceMode:'random', selectedGame:null, rankingSeed:null, showFullAnalysis:false };
+
+function newEmptyGame(){
+  return {
+    hands:null, initialHands:null, contract:null, trump:null, level:null, seedId:null,
+    dealer:null, vulnerable:false, auctionHistory:[], pendingLevel:1, pendingSuit:'♣',
+    declarer:null, declarerSide:null, dummy:null, userControlledSeats:[],
+    turn:null, leader:null,
+    trickCards:[], tricks:[], tricksWon:{N:0,E:0,S:0,W:0}, history:[], trickComplete:false,
+    coachStats:{matches:0, total:0},
+    phase:'setup', suggestion:null, hcp:null
+  };
+}
+function genSeedId(){ return 's'+Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+
+/* ============ RENDER HELPERS ============ */
+function el(tag, attrs, children){
+  var e = document.createElement(tag);
+  if (attrs) for (var k in attrs){
+    if (k==='class') e.className = attrs[k];
+    else if (k==='html') e.innerHTML = attrs[k];
+    else e.setAttribute(k, attrs[k]);
+  }
+  if (children) children.forEach(function(c){ if (c) e.appendChild(c); });
+  return e;
+}
+function txt(s){ return document.createTextNode(s); }
+function isRed(suit){ return suit==='♥' || suit==='♦'; }
+function cardEl(card, opts){
+  opts = opts || {};
+  var b = el('button', {class:'pcard ' + (isRed(card.suit)?'red':'black') + (opts.disabled?' disabled':'')});
+  b.appendChild(el('div',{},[txt(card.rank)]));
+  b.appendChild(el('div',{class:'sfx'},[txt(card.suit)]));
+  if (!opts.disabled && opts.onClick){ b.addEventListener('click', opts.onClick); }
+  else { b.disabled = true; }
+  return b;
+}
+function showToast(msg){
+  var host = document.getElementById('toastHost');
+  host.innerHTML = '';
+  var t = el('div',{class:'toast'},[txt(msg)]);
+  host.appendChild(t);
+  if (state.toastTimer) clearTimeout(state.toastTimer);
+  state.toastTimer = setTimeout(function(){ host.innerHTML=''; }, 2600);
+}
+function statBox(v,l){
+  return el('div',{class:'stat-box'},[el('div',{class:'v'},[txt(String(v))]), el('div',{class:'l'},[txt(l)])]);
+}
+
+/* ============ RENDER: ROOT ============ */
+function render(){
+  var app = document.getElementById('app');
+  app.innerHTML = '';
+  var profile = getProfile();
+  document.body.className = (profile.settings.theme==='light') ? 'theme-light' : '';
+
+  var themeBtn = el('button',{class:'theme-btn'},[txt(profile.settings.theme==='light' ? '🌙' : '☀️')]);
+  themeBtn.addEventListener('click', function(){
+    profile.settings.theme = (profile.settings.theme==='light') ? 'dark' : 'light';
+    saveProfile(profile);
+    render();
+  });
+
+  var header = el('header',{class:'top'},[
+    el('div',{class:'brand'},[
+      el('div',{class:'logo'},[txt('♠')]),
+      el('div',{},[
+        el('h1',{},[txt('Lola')]),
+        el('p',{},[txt('Bridge mentor · 100% offline')])
+      ])
+    ]),
+    el('div',{style:'display:flex;align-items:center;gap:8px;'},[
+      el('div',{class:'elo-chip'},[txt('ELO '), el('b',{},[txt(String(profile.elo))])]),
+      themeBtn
+    ])
+  ]);
+  app.appendChild(header);
+
+  var tabs = [{id:'game',icon:'🎯',label:'Jugar'},{id:'stats',icon:'📊',label:'Análisis'},{id:'settings',icon:'⚙️',label:'Ajustes'}];
+  var nav = el('nav',{class:'tabs'});
+  tabs.forEach(function(t){
+    var b = el('button',{class:t.id===state.tab?'active':''},[txt(t.icon+' '+t.label)]);
+    b.addEventListener('click', function(){ state.tab = t.id; render(); });
+    nav.appendChild(b);
+  });
+  app.appendChild(nav);
+
+  if (state.tab==='game') renderGame(app);
+  if (state.tab==='stats') renderStats(app);
+  if (state.tab==='settings') renderSettings(app);
+
+  app.appendChild(el('footer',{class:'note'},[txt('Lola v2.0 · sin conexión · tus datos se guardan solo en este dispositivo')]));
+}
+
+/* ============ RENDER: GAME TAB ============ */
+function renderGame(app){
+  var g = state.game;
+  if (!g || g.phase==='setup'){
+    var panel = el('div',{class:'card-panel'});
+    panel.appendChild(el('h3',{},[txt('Nueva mano')]));
+    panel.appendChild(el('p',{style:'color:#c9c9e6;font-size:13px;'},[txt('Elige un modo de práctica. Siempre te sientas en Sur; según cómo vaya la subasta, a veces declararás, a veces defenderás y a veces serás el muerto.')]));
+    var modes = [
+      {id:'random', label:'🎲 Aleatoria'},
+      {id:'strong', label:'💪 Fuerte 15-17 eq.'},
+      {id:'long', label:'📏 Palo largo 6+'},
+      {id:'slam', label:'💎 Slam 20+ PH'},
+      {id:'weak', label:'🪶 Débil 0-7 PH'}
+    ];
+    var modeWrap = el('div',{class:'contract-picker'});
+    modes.forEach(function(m){
+      var p = el('button',{class:'pill'+(state.practiceMode===m.id?' selected':'')},[txt(m.label)]);
+      p.addEventListener('click', function(){ state.practiceMode = m.id; render(); });
+      modeWrap.appendChild(p);
+    });
+    panel.appendChild(el('label',{class:'fieldlabel'},[txt('Tu mano (Sur) se ajustará a este perfil; el resto se reparte al azar')]));
+    panel.appendChild(modeWrap);
+    var btn = el('button',{class:'btn btn-primary',style:'margin-top:14px;'},[txt('🎲 Repartir mano')]);
+    btn.addEventListener('click', function(){ dealNewGame(); });
+    panel.appendChild(btn);
+    app.appendChild(panel);
+    return;
+  }
+  if (g.phase==='bidding'){ renderBiddingPanel(app); return; }
+  renderTable(app);
+}
+
+function dealNewGame(repeatSeed){
+  var hands, seedId, vulnerable, dealer;
+  if (repeatSeed){
+    hands = deepClone(repeatSeed.hands);
+    seedId = repeatSeed.seedId;
+    vulnerable = repeatSeed.vulnerable;
+    dealer = repeatSeed.dealer;
+  } else {
+    hands = (state.practiceMode && state.practiceMode!=='random') ? generateConstrainedHand(state.practiceMode) : dealHands();
+    seedId = genSeedId();
+    vulnerable = Math.random()<0.5;
+    dealer = SEATS[Math.floor(Math.random()*4)];
+  }
+  var g = newEmptyGame();
+  g.hands = hands;
+  g.initialHands = deepClone(hands);
+  g.seedId = seedId;
+  g.hcp = calcHCP(hands.S);
+  g.suggestion = suggestOpeningBid(hands.S);
+  g.dealer = dealer;
+  g.vulnerable = vulnerable;
+  g.turn = g.dealer;
+  g.phase = 'bidding';
+  state.game = g;
+  state.rankingSeed = null;
+  state.showFullAnalysis = false;
+  render();
+  setTimeout(auctionStepIfAI, 350);
+}
+function repeatCurrentHand(){
+  var g = state.game;
+  if (!g || !g.initialHands) return;
+  dealNewGame({hands:g.initialHands, seedId:g.seedId, vulnerable:g.vulnerable, dealer:g.dealer});
+}
+
+/* ============ AUCTION ============ */
+function auctionStepIfAI(){
+  var g = state.game;
+  if (!g || g.phase!=='bidding') return;
+  if (g.turn==='S') return;
+  var bid = aiDecideBid(g.turn, g.hands[g.turn]);
+  submitBid(g.turn, bid);
+}
+function submitBid(seat, bid){
+  var g = state.game;
+  g.auctionHistory.push({seat:seat, bid:bid});
+  var passCount = 0;
+  for (var i=g.auctionHistory.length-1;i>=0;i--){
+    if (g.auctionHistory[i].bid==='PASS') passCount++; else break;
+  }
+  var anyBid = g.auctionHistory.some(function(e){ return e.bid!=='PASS'; });
+  if (anyBid && passCount>=3){ concludeAuction(); return; }
+  if (!anyBid && passCount>=4){
+    showToast('Todos pasan. Repartiendo de nuevo…');
+    setTimeout(function(){ dealNewGame(); }, 1300);
+    return;
+  }
+  g.turn = nextSeatCW(seat);
+  render();
+  setTimeout(auctionStepIfAI, 550);
+}
+function concludeAuction(){
+  var g = state.game;
+  var highestEntry = null;
+  for (var i=g.auctionHistory.length-1;i>=0;i--){
+    if (g.auctionHistory[i].bid!=='PASS'){ highestEntry = g.auctionHistory[i]; break; }
+  }
+  g.level = highestEntry.bid.level;
+  g.trump = highestEntry.bid.suit;
+  g.contract = g.level + g.trump;
+  var side = partnershipOf(highestEntry.seat);
+  var declarer = highestEntry.seat;
+  for (i=0;i<g.auctionHistory.length;i++){
+    var e = g.auctionHistory[i];
+    if (e.bid!=='PASS' && e.bid.suit===g.trump && partnershipOf(e.seat)===side){ declarer = e.seat; break; }
+  }
+  g.declarer = declarer;
+  g.declarerSide = side;
+  g.dummy = partnerOf(declarer);
+  g.leader = nextSeatCW(declarer);
+  g.turn = g.leader;
+  g.userControlledSeats = declarer==='S' ? ['S','N'] : (g.dummy==='S' ? [] : ['S']);
+  g.phase = 'playing';
+  render();
+  setTimeout(aiTurnIfNeeded, 450);
+}
+function renderBiddingPanel(app){
+  var g = state.game;
+  var panel = el('div',{class:'card-panel'});
+  panel.appendChild(el('h3',{},[txt('Tu mano (Sur) · '+g.hcp+' PH'+(g.vulnerable?' · Vulnerable':' · No vulnerable'))]));
+  var handRow = el('div',{class:'hand-row'});
+  g.hands.S.forEach(function(c){ handRow.appendChild(cardEl(c,{disabled:true})); });
+  panel.appendChild(handRow);
+  panel.appendChild(el('p',{style:'margin-top:10px;font-size:13px;color:#c9c9e6;'},[
+    txt('Lola sugiere: '), el('b',{style:'color:var(--gold);'},[txt(g.suggestion)])
+  ]));
+  app.appendChild(panel);
+
+  var auctionPanel = el('div',{class:'card-panel'});
+  auctionPanel.appendChild(el('h3',{},[txt('Subasta · reparte '+SEAT_NAMES[g.dealer])]));
+  var log = el('div',{style:'display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;'});
+  g.auctionHistory.forEach(function(e){
+    var label = e.bid==='PASS' ? 'Pasa' : (e.bid.level+e.bid.suit);
+    log.appendChild(el('span',{class:'badge'},[txt(e.seat+': '+label)]));
+  });
+  if (!g.auctionHistory.length) log.appendChild(el('span',{class:'badge'},[txt('Nadie ha pujado aún')]));
+  auctionPanel.appendChild(log);
+
+  if (g.turn==='S'){
+    var levelWrap = el('div',{class:'contract-picker'});
+    [1,2,3,4,5,6,7].forEach(function(lv){
+      var p = el('button',{class:'pill'+(g.pendingLevel===lv?' selected':'')},[txt(String(lv))]);
+      p.addEventListener('click', function(){ g.pendingLevel=lv; render(); });
+      levelWrap.appendChild(p);
+    });
+    auctionPanel.appendChild(el('label',{class:'fieldlabel'},[txt('Nivel')]));
+    auctionPanel.appendChild(levelWrap);
+
+    var suitWrap = el('div',{class:'contract-picker'});
+    SUITS.concat(['NT']).forEach(function(su){
+      var p = el('button',{class:'pill'+(g.pendingSuit===su?' selected':'')},[txt(su)]);
+      p.addEventListener('click', function(){ g.pendingSuit=su; render(); });
+      suitWrap.appendChild(p);
+    });
+    auctionPanel.appendChild(el('label',{class:'fieldlabel'},[txt('Palo / SA')]));
+    auctionPanel.appendChild(suitWrap);
+
+    var btnRow = el('div',{class:'btn-row',style:'margin-top:12px;'});
+    var bidBtn = el('button',{class:'btn btn-primary'},[txt('📣 Pujar '+g.pendingLevel+g.pendingSuit)]);
+    bidBtn.addEventListener('click', function(){
+      var candidate = {level:g.pendingLevel, suit:g.pendingSuit};
+      var highestEntry = null;
+      for (var i=g.auctionHistory.length-1;i>=0;i--){
+        if (g.auctionHistory[i].bid!=='PASS'){ highestEntry = g.auctionHistory[i]; break; }
+      }
+      if (highestEntry && bidRank(candidate)<=bidRank(highestEntry.bid)){
+        showToast('Esa puja no supera la actual ('+highestEntry.bid.level+highestEntry.bid.suit+')');
+        return;
+      }
+      applyCoachBidFeedback(g, candidate);
+      submitBid('S', candidate);
+    });
+    btnRow.appendChild(bidBtn);
+    var passBtn = el('button',{class:'btn btn-secondary'},[txt('🚫 Pasar')]);
+    passBtn.addEventListener('click', function(){
+      applyCoachBidFeedback(g, 'PASS');
+      submitBid('S','PASS');
+    });
+    btnRow.appendChild(passBtn);
+    auctionPanel.appendChild(btnRow);
+  } else {
+    auctionPanel.appendChild(el('p',{style:'color:var(--muted);font-size:13px;'},[txt('Turno de '+SEAT_NAMES[g.turn]+'…')]));
+  }
+  app.appendChild(auctionPanel);
+}
+function applyCoachBidFeedback(g, userBid){
+  if (!coachEnabled()) return;
+  var recommended = aiDecideBid('S', g.hands.S);
+  g.coachStats.total++;
+  if (bidsEqual(userBid, recommended)){ g.coachStats.matches++; return; }
+  var hcp = g.hcp;
+  showToast('Lola (coach): con '+hcp+' PH, la regla básica sugeriría '+bidToStr(recommended)+' en vez de '+bidToStr(userBid)+'.');
+}
+
+/* ============ PLAYING ============ */
+function playCard(seat, card){
+  var g = state.game;
+  if (!g || g.turn!==seat || g.phase!=='playing' || g.trickComplete) return;
+  var hand = g.hands[seat];
+  var idx = hand.indexOf(card);
+  if (idx===-1) return;
+
+  var coachMsg = null;
+  if (coachEnabled() && g.userControlledSeats.indexOf(seat)>-1){
+    var recommended = aiChooseCard(hand, g.trickCards, g.trump);
+    g.coachStats.total++;
+    if (recommended === card){ g.coachStats.matches++; }
+    else { coachMsg = coachCardReason(g.trickCards.length, recommended); }
+  }
+
+  g.history.push(deepClone({hands:g.hands, trickCards:g.trickCards, tricks:g.tricks, tricksWon:g.tricksWon, turn:g.turn, leader:g.leader, coachStats:g.coachStats}));
+
+  hand.splice(idx,1);
+  g.trickCards.push({seat:seat, card:card});
+  playCardSound();
+  if (coachMsg) showToast(coachMsg);
+
+  if (g.trickCards.length===4){
+    var winner = trickWinner(g.trickCards, g.trump).seat;
+    g.tricksWon[winner]++;
+    g.tricks.push({cards:g.trickCards, winner:winner});
+    g.turn = winner;
+    g.trickComplete = true;
+    render();
+    setTimeout(function(){
+      var g2 = state.game;
+      if (!g2) return;
+      g2.trickCards = [];
+      g2.trickComplete = false;
+      if (g2.tricks.length===13){
+        finishGame();
+        render();
+        return;
+      }
+      render();
+      setTimeout(aiTurnIfNeeded, 450);
+    }, 1500);
+    return;
+  }
+
+  g.turn = nextSeatCW(seat);
+  render();
+  setTimeout(aiTurnIfNeeded, 450);
+}
+function aiTurnIfNeeded(){
+  var g = state.game;
+  if (!g || g.phase!=='playing' || g.trickComplete) return;
+  if (g.userControlledSeats.indexOf(g.turn)>-1) return;
+  var hand = g.hands[g.turn];
+  if (!hand.length) return;
+  var choice = aiChooseCard(hand, g.trickCards, g.trump);
+  playCard(g.turn, choice);
+}
+function undoLastPlay(){
+  var g = state.game;
+  if (!g || !g.history.length){ showToast('No hay nada que deshacer'); return; }
+  var prev = g.history.pop();
+  g.hands = prev.hands; g.trickCards = prev.trickCards; g.tricks = prev.tricks;
+  g.tricksWon = prev.tricksWon; g.turn = prev.turn; g.leader = prev.leader;
+  if (prev.coachStats) g.coachStats = prev.coachStats;
+  g.phase = 'playing';
+  render();
+  showToast('Jugada deshecha');
+  setTimeout(aiTurnIfNeeded, 400);
+}
+function finishGame(){
+  var g = state.game;
+  g.phase = 'finished';
+  var declarerTricks = g.declarerSide==='NS' ? (g.tricksWon.N+g.tricksWon.S) : (g.tricksWon.E+g.tricksWon.W);
+  var needed = g.level + 6;
+  var made = declarerTricks >= needed;
+  var rawScore = computeScore(g.level, g.trump, declarerTricks, g.vulnerable);
+  var nsScore = g.declarerSide==='NS' ? rawScore : -rawScore;
+  var userWon = nsScore>0;
+  if (userWon) playWinSound(); else if (nsScore<0) playLoseSound();
+  addGame({
+    date: new Date().toISOString(),
+    contract: g.contract,
+    declarer: g.declarer,
+    declarerSide: g.declarerSide,
+    result: made?'MAKE':'DOWN',
+    tricksWon: declarerTricks,
+    tricksBid: needed,
+    vulnerable: g.vulnerable,
+    dealer: g.dealer,
+    seedId: g.seedId,
+    score: rawScore,
+    nsScore: nsScore,
+    userWon: userWon,
+    hcp: g.hcp,
+    level: g.level,
+    dealSnapshot: g.initialHands,
+    tricksLog: g.tricks,
+    auction: g.auctionHistory,
+    coachMatches: g.coachStats.matches,
+    coachTotal: g.coachStats.total,
+    handInsights: buildHandInsights(g)
+  });
+  setTimeout(function(){
+    var msg;
+    if (g.declarerSide==='NS'){
+      if (made){
+        var over = declarerTricks-needed;
+        msg = over>0 ? ('Lola: ¡Contrato hecho con '+over+' de pasada! ('+(nsScore>=0?'+':'')+nsScore+' puntos)')
+                      : ('Lola: Contrato justo. ('+(nsScore>=0?'+':'')+nsScore+' puntos)');
+      } else {
+        msg = 'Lola: Caído por '+(needed-declarerTricks)+'. ('+nsScore+' puntos)';
+      }
+    } else {
+      if (made){
+        msg = 'Lola: Los rivales han cumplido su contrato. ('+nsScore+' puntos)';
+      } else {
+        msg = 'Lola: ¡Buena defensa! Habéis hecho caer el contrato rival. (+'+Math.abs(nsScore)+' puntos)';
+      }
+    }
+    if (coachEnabled() && g.coachStats.total>0){
+      msg += ' · Coach: '+g.coachStats.matches+'/'+g.coachStats.total+' decisiones según la regla básica.';
+    }
+    showToast(msg);
+  }, 500);
+}
+
+/* ============ RENDER: TABLE ============ */
+function renderTable(app){
+  var g = state.game;
+  var declarerTricks = g.declarerSide==='NS' ? (g.tricksWon.N+g.tricksWon.S) : (g.tricksWon.E+g.tricksWon.W);
+  var needed = g.level + 6;
+
+  var status = el('div',{class:'card-panel'});
+  var row = el('div',{class:'row-stats'});
+  row.appendChild(statBox(g.contract,'Contrato'));
+  row.appendChild(statBox(declarerTricks+' / '+needed,'Bazas necesarias'));
+  row.appendChild(statBox(SEAT_NAMES[g.turn]||'-','Turno'));
+  row.appendChild(statBox(g.vulnerable?'Sí':'No','Vulnerable'));
+  status.appendChild(row);
+  status.appendChild(el('p',{style:'margin-top:8px;font-size:12px;color:var(--muted);'},[
+    txt('Declara '+SEAT_NAMES[g.declarer]+' · Muerto: '+SEAT_NAMES[g.dummy])
+  ]));
+  app.appendChild(status);
+
+  var tw = el('div',{class:'table-wrap'});
+  var compass = el('div',{class:'compass'});
+  compass.appendChild(el('div',{class:'n'},[el('span',{class:'seat-label'},[txt('N '+g.tricksWon.N)])]));
+  compass.appendChild(el('div',{class:'w'},[el('span',{class:'seat-label'},[txt('O '+g.tricksWon.W)])]));
+  var midCell = el('div',{class:'mid'});
+  var trickRow = el('div',{style:'display:flex;gap:8px;'});
+  SEATS.forEach(function(seat){
+    var found = g.trickCards.filter(function(tc){return tc.seat===seat;})[0];
+    if (found){
+      trickRow.appendChild(el('div',{class:'trick-slot filled'+(isRed(found.card.suit)?' red':'')},[txt(cardStr(found.card))]));
+    } else {
+      trickRow.appendChild(el('div',{class:'trick-slot'},[txt(seat)]));
+    }
+  });
+  midCell.appendChild(trickRow);
+  compass.appendChild(midCell);
+  compass.appendChild(el('div',{class:'e'},[el('span',{class:'seat-label'},[txt('E '+g.tricksWon.E)])]));
+  compass.appendChild(el('div',{class:'s'},[el('span',{class:'seat-label'},[txt('S '+g.tricksWon.S)])]));
+  tw.appendChild(compass);
+  app.appendChild(tw);
+
+  var revealed = g.tricks.length>0 || g.trickCards.length>0;
+
+  if (g.dummy!=='S' && revealed){
+    var dummySeat = g.dummy;
+    var dummyPanel = el('div',{class:'card-panel'});
+    dummyPanel.appendChild(el('h3',{},[txt('Muerto ('+SEAT_NAMES[dummySeat]+')')]));
+    var dummyRow = el('div',{class:'hand-row'});
+    var canPlayDummy = g.turn===dummySeat && g.phase==='playing' && !g.trickComplete && g.userControlledSeats.indexOf(dummySeat)>-1;
+    var validDummy = canPlayDummy ? getValidMoves(g.hands[dummySeat], g.trickCards, g.trump) : [];
+    g.hands[dummySeat].forEach(function(c){
+      var playable = canPlayDummy && validDummy.indexOf(c)>-1;
+      dummyRow.appendChild(cardEl(c,{disabled:!playable, onClick: playable?function(){playCard(dummySeat,c);}:null}));
+    });
+    dummyPanel.appendChild(dummyRow);
+    app.appendChild(dummyPanel);
+  }
+
+  var southPanel = el('div',{class:'card-panel'});
+  southPanel.appendChild(el('h3',{},[txt('Tu mano (Sur)'+(g.dummy==='S'?' · eres el muerto, la juega tu compañero':''))]));
+  var southRow = el('div',{class:'hand-row'});
+  var canPlaySouth = g.turn==='S' && g.phase==='playing' && !g.trickComplete && g.userControlledSeats.indexOf('S')>-1;
+  var validSouth = canPlaySouth ? getValidMoves(g.hands.S, g.trickCards, g.trump) : [];
+  g.hands.S.forEach(function(c){
+    var playable = canPlaySouth && validSouth.indexOf(c)>-1;
+    southRow.appendChild(cardEl(c,{disabled:!playable, onClick: playable?function(){playCard('S',c);}:null}));
+  });
+  southPanel.appendChild(southRow);
+  app.appendChild(southPanel);
+
+  var btnRow = el('div',{class:'btn-row'});
+  if (g.phase==='playing' && !g.trickComplete && g.userControlledSeats.indexOf(g.turn)>-1){
+    var hintBtn = el('button',{class:'btn btn-secondary'},[txt('💡 Pista')]);
+    hintBtn.addEventListener('click', function(){
+      var suggestion = aiChooseCard(g.hands[g.turn], g.trickCards, g.trump);
+      showToast(coachCardReason(g.trickCards.length, suggestion, g));
+    });
+    btnRow.appendChild(hintBtn);
+  }
+  var undoBtn = el('button',{class:'btn btn-secondary'},[txt('↩️ Deshacer')]);
+  if (!g.history.length) undoBtn.disabled = true;
+  undoBtn.addEventListener('click', undoLastPlay);
+  btnRow.appendChild(undoBtn);
+  var newHandBtn = el('button',{class:'btn btn-secondary'},[txt('🎲 Nueva mano')]);
+  newHandBtn.addEventListener('click', function(){ dealNewGame(); });
+  btnRow.appendChild(newHandBtn);
+  app.appendChild(btnRow);
+
+  if (g.phase==='finished'){
+    var made = declarerTricks>=needed;
+    var goodForUser = (g.declarerSide==='NS')===made;
+    var res = el('div',{class:'card-panel',style:'text-align:center;'},[
+      el('div',{style:'font-size:38px;'},[txt(goodForUser?'🎉':'😞')]),
+      el('h3',{style:'color:'+(goodForUser?'var(--green)':'var(--red)')+';text-transform:none;font-size:18px;'},[
+        txt(made ? (g.declarerSide==='NS'?'¡Contrato cumplido!':'Contrato rival cumplido') : (g.declarerSide==='NS'?'Contrato fallido':'¡Contrato rival caído!'))
+      ]),
+      el('p',{style:'color:#c9c9e6;font-size:13px;'},[txt('Bazas del declarante: '+declarerTricks+' / '+needed)])
+    ]);
+    if (coachEnabled()){
+      var insights = buildHandInsights(g);
+      if (insights){
+        res.appendChild(el('p',{style:'font-size:12px;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px solid var(--border);text-align:left;'},[
+          txt('📐 Lola (coach) — plan de la mano: '+insights)
+        ]));
+      }
+    }
+    var res2Row = el('div',{class:'btn-row',style:'justify-content:center;margin-top:6px;'});
+    var repeatBtn = el('button',{class:'btn btn-secondary'},[txt('🔁 Repetir esta mano')]);
+    repeatBtn.addEventListener('click', function(){ repeatCurrentHand(); });
+    res2Row.appendChild(repeatBtn);
+    var rankBtn = el('button',{class:'btn btn-secondary'},[txt('🏆 Ranking de esta mano')]);
+    rankBtn.addEventListener('click', function(){ state.rankingSeed = (state.rankingSeed===g.seedId ? null : g.seedId); render(); });
+    res2Row.appendChild(rankBtn);
+    var analysisBtn = el('button',{class:'btn btn-secondary'},[txt('📊 Análisis completo')]);
+    analysisBtn.addEventListener('click', function(){
+      if (g.declarerSide!=='NS'){
+        showToast('El análisis completo solo se calcula cuando declara vuestro bando (N-S).');
+        return;
+      }
+      state.showFullAnalysis = !state.showFullAnalysis;
+      render();
+    });
+    res2Row.appendChild(analysisBtn);
+    res.appendChild(res2Row);
+    app.appendChild(res);
+    if (state.rankingSeed === g.seedId){
+      app.appendChild(renderHandRanking(g.seedId));
+    }
+    if (state.showFullAnalysis && g.declarerSide==='NS'){
+      app.appendChild(renderFullAnalysisPanel(g));
+    }
+  }
+}
+
+/* ============ RANKING POR MANO (misma semilla repartida) ============ */
+function renderHandRanking(seedId){
+  var games = getGames().filter(function(g){ return g.seedId===seedId; });
+  var panel = el('div',{class:'card-panel'});
+  panel.appendChild(el('h3',{},[txt('🏆 Tus intentos con esta mano ('+games.length+')')]));
+  panel.appendChild(el('p',{style:'font-size:12px;color:var(--muted);margin-top:-4px;margin-bottom:10px;'},[
+    txt('Mismas 4 manos repartidas cada vez; se compara contigo mismo, no contra otros jugadores.')
+  ]));
+  if (!games.length){
+    panel.appendChild(el('p',{style:'font-size:13px;color:var(--muted);'},[txt('Aún no hay intentos registrados.')]));
+    return panel;
+  }
+  var sorted = games.slice().sort(function(a,b){ return b.nsScore - a.nsScore; });
+  sorted.forEach(function(g, i){
+    var needed = g.tricksBid;
+    var diff = g.tricksWon - needed;
+    var diffLabel = g.result==='MAKE'
+      ? (diff>0 ? ('+'+diff+' de pasada') : 'justo')
+      : ('caído '+Math.abs(diff));
+    var row = el('div',{style:'display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:12.5px;'},[
+      el('span',{},[
+        el('b',{},[txt('#'+(i+1)+' ')]),
+        txt(g.contract+' ('+SEAT_NAMES[g.declarer].split(' ')[0]+') · '+g.tricksWon+'/'+needed+' · '+diffLabel+(g.vulnerable?' · vul':''))
+      ]),
+      el('span',{style:'color:'+(g.nsScore>=0?'var(--green)':'var(--red)')+';font-weight:700;'},[txt((g.nsScore>=0?'+':'')+g.nsScore)])
+    ]);
+    panel.appendChild(row);
+  });
+  return panel;
+}
+
+/* ============ RENDER: STATS TAB ============ */
+function renderStats(app){
+  var games = getGames();
+  var profile = getProfile();
+  if (!games.length){
+    app.appendChild(el('div',{class:'card-panel center-msg'},[
+      el('div',{class:'emoji'},[txt('📊')]),
+      el('h3',{style:'text-transform:none;font-size:18px;'},[txt('Sin datos aún')]),
+      el('p',{style:'color:#c9c9e6;font-size:13px;'},[txt('Juega alguna mano para ver tu análisis aquí.')])
+    ]));
+    return;
+  }
+  var total = games.length;
+  var wins = games.filter(function(g){return g.userWon;}).length;
+  var winRate = Math.round((wins/total)*100);
+  var avgTricks = Math.round(games.reduce(function(a,g){return a+g.tricksWon;},0)/total);
+  var totalPoints = games.reduce(function(a,g){return a+(g.nsScore||0);},0);
+
+  var summary = el('div',{class:'card-panel'});
+  var row = el('div',{class:'row-stats'});
+  row.appendChild(statBox(total,'Partidas'));
+  row.appendChild(statBox(winRate+'%','Tasa de éxito'));
+  row.appendChild(statBox(avgTricks+'/13','Prom. bazas'));
+  row.appendChild(statBox((totalPoints>=0?'+':'')+totalPoints,'Puntos totales'));
+  summary.appendChild(row);
+  app.appendChild(summary);
+
+  var chartPanel = el('div',{class:'card-panel'});
+  chartPanel.appendChild(el('h3',{},[txt('Últimas 10 manos (bazas del declarante)')]));
+  var canvas = el('canvas',{width:'600',height:'140'});
+  chartPanel.appendChild(canvas);
+  app.appendChild(chartPanel);
+  drawBarChart(canvas, games.slice(0,10).reverse());
+
+  var achPanel = el('div',{class:'card-panel'});
+  achPanel.appendChild(el('h3',{},[txt('🏆 Logros')]));
+  var achGrid = el('div',{class:'ach-grid'});
+  getAchievements(games, profile).forEach(function(a){
+    var box = el('div',{class:'ach-box',style:'opacity:'+(a.unlocked?'1':'.35')+';'},[
+      el('div',{class:'ic'},[txt(a.icon)]),
+      el('div',{class:'nm'},[txt(a.name)])
+    ]);
+    achGrid.appendChild(box);
+  });
+  achPanel.appendChild(achGrid);
+  if (profile.streak>0) achPanel.appendChild(el('p',{style:'margin-top:8px;font-size:12px;color:var(--muted);'},[txt('Racha actual: '+profile.streak+' · Mejor racha: '+(profile.bestStreak||0))]));
+  app.appendChild(achPanel);
+
+  var recentPanel = el('div',{class:'card-panel'});
+  recentPanel.appendChild(el('h3',{},[txt('Historial reciente (toca una fila para ver la mano)')]));
+  var list = el('div');
+  games.slice(0,10).forEach(function(g, idx){
+    var line = el('div',{class:'hist-line'},[
+      el('span',{},[txt(g.contract+' ('+SEAT_NAMES[g.declarer]+') · '+g.tricksWon+'/'+g.tricksBid)]),
+      el('span',{style:'color:'+(g.userWon?'var(--green)':'var(--red)')+';font-weight:700;'},[txt((g.nsScore>=0?'+':'')+g.nsScore)])
+    ]);
+    line.addEventListener('click', function(){ state.selectedGame = (state.selectedGame===idx?null:idx); render(); });
+    list.appendChild(line);
+    if (state.selectedGame===idx){
+      list.appendChild(renderGameDetail(g));
+      var attempts = getGames().filter(function(x){ return x.seedId && x.seedId===g.seedId; }).length;
+      if (g.seedId && attempts>1){
+        var rankBtn2 = el('button',{class:'btn btn-secondary',style:'margin-bottom:12px;'},[txt('🏆 Ranking de esta mano ('+attempts+' intentos)')]);
+        rankBtn2.addEventListener('click', function(){ state.rankingSeed = (state.rankingSeed===g.seedId ? null : g.seedId); render(); });
+        list.appendChild(rankBtn2);
+        if (state.rankingSeed===g.seedId){ list.appendChild(renderHandRanking(g.seedId)); }
+      }
+    }
+  });
+  recentPanel.appendChild(list);
+  app.appendChild(recentPanel);
+}
+function renderGameDetail(g){
+  var box = el('div',{class:'detail-box'});
+  var auctionStr = (g.auction||[]).map(function(e){
+    return e.seat+' '+(e.bid==='PASS' ? 'Pasa' : (e.bid.level+e.bid.suit));
+  }).join(' · ');
+  box.appendChild(el('div',{style:'margin-bottom:6px;color:var(--muted);'},[txt('Subasta: '+(auctionStr||'—'))]));
+  if (g.handInsights){
+    box.appendChild(el('div',{style:'margin-bottom:6px;'},[txt('📐 Plan de la mano: '+g.handInsights)]));
+  }
+  if (g.dealSnapshot){
+    SEATS.forEach(function(seat){
+      var cards = g.dealSnapshot[seat] || [];
+      box.appendChild(el('div',{style:'margin:3px 0;'},[
+        el('b',{},[txt(SEAT_NAMES[seat]+': ')]),
+        txt(cards.map(function(c){return c.rank+c.suit;}).join(' '))
+      ]));
+    });
+  }
+  if (g.tricksLog && g.tricksLog.length){
+    box.appendChild(el('div',{style:'margin-top:8px;color:var(--muted);'},[txt('Bazas:')]));
+    g.tricksLog.forEach(function(t, i){
+      var line = t.cards.map(function(pc){return pc.seat+':'+pc.card.rank+pc.card.suit;}).join(' ');
+      box.appendChild(el('div',{},[txt((i+1)+'. '+line+' → gana '+t.winner)]));
+    });
+  }
+  return box;
+}
+function drawBarChart(canvas, games){
+  var ctx = canvas.getContext('2d');
+  var w = canvas.width, h = canvas.height;
+  ctx.clearRect(0,0,w,h);
+  if (!games.length) return;
+  var barW = w / games.length;
+  games.forEach(function(g, i){
+    var pct = g.tricksWon / 13;
+    var barH = pct * (h-20);
+    var x = i*barW + barW*0.2;
+    var y = h - barH - 14;
+    ctx.fillStyle = g.userWon ? '#4ade80' : '#f87171';
+    ctx.fillRect(x, y, barW*0.6, barH);
+    ctx.fillStyle = '#9a9ac0';
+    ctx.font = '9px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(String(g.tricksWon), x+barW*0.3, h-3);
+  });
+}
+
+/* ============ RENDER: SETTINGS TAB ============ */
+function renderSettings(app){
+  var p = getProfile();
+  var panel = el('div',{class:'card-panel'});
+  panel.appendChild(el('h3',{},[txt('Perfil')]));
+  panel.appendChild(el('label',{class:'fieldlabel'},[txt('Nombre')]));
+  var nameInput = el('input',{type:'text'});
+  nameInput.value = p.name;
+  nameInput.addEventListener('change', function(){ p.name = nameInput.value || 'Jugador'; saveProfile(p); });
+  panel.appendChild(nameInput);
+
+  var soundRow = el('div',{style:'display:flex;justify-content:space-between;align-items:center;margin-top:14px;'});
+  soundRow.appendChild(el('span',{style:'color:#c9c9e6;font-size:14px;'},[txt('🔊 Sonidos')]));
+  var toggle = el('div',{class:'toggle'+(p.settings.sound?' on':'')},[el('div',{class:'dot'})]);
+  toggle.addEventListener('click', function(){ p.settings.sound = !p.settings.sound; saveProfile(p); render(); });
+  soundRow.appendChild(toggle);
+  panel.appendChild(soundRow);
+
+  var coachRow = el('div',{style:'display:flex;justify-content:space-between;align-items:center;margin-top:14px;'});
+  coachRow.appendChild(el('span',{style:'color:#c9c9e6;font-size:14px;'},[txt('🎓 Coach (reglas básicas)')]));
+  var coachToggle = el('div',{class:'toggle'+((p.settings.coach!==false)?' on':'')},[el('div',{class:'dot'})]);
+  coachToggle.addEventListener('click', function(){ p.settings.coach = (p.settings.coach===false); saveProfile(p); render(); });
+  coachRow.appendChild(coachToggle);
+  panel.appendChild(coachRow);
+  panel.appendChild(el('p',{style:'font-size:11px;color:var(--muted);margin-top:6px;'},[
+    txt('Compara tus pujas y jugadas con reglas básicas fijas (PH, segunda mano baja, tercera mano alta...). No sustituye a un profesor real y a veces se equivocará.')
+  ]));
+  app.appendChild(panel);
+
+  var learnPanel = el('div',{class:'card-panel'});
+  learnPanel.appendChild(el('h3',{},[txt('📖 Chuleta rápida')]));
+  var learnLines = [
+    'Puntos de honor (PH): As=4, Rey=3, Dama=2, Sota=1.',
+    'Apertura de 1 palo: 12-19 PH con 5+ cartas en ese palo (o el más largo).',
+    '1 SA: 15-17 PH, mano equilibrada. 2 SA: 20-21 PH. 2♣: 22+ PH.',
+    'Apoyo al compañero: con 4+ cartas de su palo, sube de nivel según tus PH.',
+    'Segunda mano, juega baja. Tercera mano, juega alta. Cuarta mano, gana lo más barato posible.',
+    'El muerto se coloca boca arriba tras la salida; lo juega el declarante.',
+    'Vulnerable = primas y multas más altas si haces o fallas el contrato.'
+  ];
+  var learnList = el('ul',{style:'margin:0;padding-left:18px;font-size:12.5px;color:var(--text);line-height:1.7;'});
+  learnLines.forEach(function(l){ learnList.appendChild(el('li',{},[txt(l)])); });
+  learnPanel.appendChild(learnList);
+  app.appendChild(learnPanel);
+
+  var backup = el('div',{class:'card-panel'});
+  backup.appendChild(el('h3',{},[txt('Backup y restauración')]));
+  var btnRow = el('div',{class:'btn-row'});
+  var exportBtn = el('button',{class:'btn btn-secondary'},[txt('📥 Exportar datos')]);
+  exportBtn.addEventListener('click', doExport);
+  btnRow.appendChild(exportBtn);
+  var importLabel = el('label',{class:'btn btn-secondary',style:'cursor:pointer;'},[txt('📤 Importar backup')]);
+  var fileInput = el('input',{type:'file',accept:'.json',style:'display:none;'});
+  fileInput.addEventListener('change', doImport);
+  importLabel.appendChild(fileInput);
+  btnRow.appendChild(importLabel);
+  backup.appendChild(btnRow);
+  app.appendChild(backup);
+
+  var dangerPanel = el('div',{class:'card-panel'});
+  dangerPanel.appendChild(el('h3',{},[txt('Zona de riesgo')]));
+  var resetBtn = el('button',{class:'btn btn-danger'},[txt('🗑️ Reiniciar progreso')]);
+  resetBtn.addEventListener('click', function(){
+    if (confirm('¿Seguro? Se borrarán todas tus partidas guardadas.')){
+      localStorage.removeItem(LS_GAMES);
+      var np = getProfile(); np.elo=1200; np.streak=0; np.bestStreak=0; saveProfile(np);
+      showToast('Progreso reiniciado');
+      render();
+    }
+  });
+  dangerPanel.appendChild(resetBtn);
+  app.appendChild(dangerPanel);
+
+  app.appendChild(el('div',{class:'card-panel',style:'text-align:center;color:var(--muted);font-size:12px;'},[
+    txt('Lola v2.0 · 100% offline · '+getGames().length+' partidas jugadas · ELO '+p.elo)
+  ]));
+}
+function doExport(){
+  var data = {version:'2.0.0', exportedAt:new Date().toISOString(), profile:getProfile(), games:getGames()};
+  var blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = 'lola-bridge-backup-'+new Date().toISOString().split('T')[0]+'.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('Datos exportados');
+}
+function doImport(ev){
+  var file = ev.target.files && ev.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      var data = JSON.parse(e.target.result);
+      if (data.profile) saveProfile(data.profile);
+      if (data.games) saveGames(data.games);
+      showToast('Datos importados');
+      render();
+    }catch(err){ showToast('Error al importar el archivo'); }
+  };
+  reader.readAsText(file);
+}
+
+/* ============ PWA ============ */
+function setupPWA(){
+  var iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">' +
+    '<rect width="512" height="512" rx="96" fill="#1a1a2e"/>' +
+    '<text x="50%" y="58%" font-size="300" text-anchor="middle" fill="#e0577a" font-family="Arial,sans-serif">♠</text>' +
+    '</svg>';
+  var iconData = 'data:image/svg+xml,' + encodeURIComponent(iconSvg);
+  var manifest = {
+    name:'Lola · Bridge Mentor', short_name:'Lola',
+    description:'Aprende y practica bridge con Lola, tu mentora offline',
+    start_url:'.', display:'standalone', background_color:'#0f0f1a', theme_color:'#0f0f1a',
+    orientation:'portrait',
+    icons:[{src:iconData, sizes:'512x512', type:'image/svg+xml', purpose:'any maskable'}]
+  };
+  try{
+    var manifestBlob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+    document.getElementById('manifestLink').setAttribute('href', URL.createObjectURL(manifestBlob));
+    document.getElementById('touchIcon').setAttribute('href', iconData);
+  }catch(e){}
+  try{
+    if ('serviceWorker' in navigator && window.location.protocol.indexOf('http')===0){
+      var swCode = "self.addEventListener('install', function(e){ self.skipWaiting(); });" +
+                   "self.addEventListener('activate', function(e){ self.clients.claim(); });" +
+                   "self.addEventListener('fetch', function(e){ });";
+      var swBlob = new Blob([swCode], {type:'application/javascript'});
+      navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(function(){});
+    }
+  }catch(e){}
+}
+
+/* ============ INIT ============ */
+try{ setupPWA(); }catch(e){}
+render();
+
+})();
+</script>
+</body>
+</html>
