@@ -80,6 +80,7 @@
   .trick-slot.filled.red{color:#d1274a;}
 
   .badge{display:inline-block;background:var(--panel2);border-radius:999px;padding:3px 10px;font-size:11px;color:var(--muted);}
+  .convention-badge{display:inline-block;background:var(--gold);color:#1a1a2e;border-radius:999px;padding:3px 10px;font-size:10px;font-weight:700;}
   .contract-picker{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
   .pill{padding:8px 12px;border-radius:12px;border:1px solid var(--border);background:var(--panel2);font-size:13px;color:var(--muted);}
   .pill.selected{background:linear-gradient(135deg,var(--accent2),var(--accent));color:#fff;border-color:transparent;}
@@ -103,6 +104,26 @@
   .ach-box{background:var(--panel2);border-radius:12px;padding:10px;text-align:center;}
   .ach-box .ic{font-size:22px;}
   .ach-box .nm{font-size:10px;margin-top:4px;color:var(--muted);}
+
+  .diagram{display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:auto auto auto;gap:6px;align-items:start;justify-items:center;background:radial-gradient(ellipse at center,rgba(255,255,255,.03),transparent 70%);border:1px solid var(--border);border-radius:16px;padding:14px 6px;margin:8px 0;}
+  .diagram .n{grid-column:2;grid-row:1;} .diagram .w{grid-column:1;grid-row:2;}
+  .diagram .mid{grid-column:2;grid-row:2;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:11px;}
+  .diagram .e{grid-column:3;grid-row:2;} .diagram .s{grid-column:2;grid-row:3;}
+  .diagram-hand{font-size:11.5px;line-height:1.6;text-align:center;min-width:72px;padding:4px 2px;border-radius:10px;}
+  .diagram-hand.declarer{background:rgba(244,201,93,.12);box-shadow:0 0 0 1px rgba(244,201,93,.35);}
+  .diagram-hand.dummy{background:rgba(255,255,255,.05);}
+  .diagram-hand .seat-tag{font-size:10px;font-weight:800;color:var(--gold);margin-bottom:3px;letter-spacing:.4px;}
+  .diagram-hand .seat-tag.plain{color:var(--muted);}
+  .diagram-hand .suitline{white-space:nowrap;font-variant-numeric:tabular-nums;}
+  .diagram-hand .suitline.red{color:#d1274a;}
+  .diagram-hand .suitline.black{color:var(--text);}
+  body.theme-light .diagram-hand.dummy{background:rgba(0,0,0,.03);}
+
+  table.results-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px;}
+  table.results-table th{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;text-align:left;padding:4px 6px;border-bottom:1px solid var(--border);}
+  table.results-table td{padding:6px;border-bottom:1px solid var(--border);}
+  table.results-table tr.best td{background:rgba(244,201,93,.08);}
+  table.results-table td.num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;}
   .theme-btn{width:38px;height:38px;border-radius:12px;background:var(--panel2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:17px;cursor:pointer;color:var(--text);flex-shrink:0;}
 
   body.theme-light{
@@ -188,6 +209,11 @@ function generateConstrainedHand(mode){
     else if (mode==='long') ok = maxSuit>=6;
     else if (mode==='slam') ok = hcp>=20;
     else if (mode==='weak') ok = hcp<=7;
+    else if (mode==='4441'){
+      var sortedCounts = counts.slice().sort(function(a,b){return b-a;});
+      ok = sortedCounts[0]===4 && sortedCounts[1]===4 && sortedCounts[2]===4 && sortedCounts[3]===1;
+    }
+    else if (mode==='twosuiter') ok = counts.filter(function(c){return c>=5;}).length>=2;
     if (ok){
       var rest = deck.slice(13);
       return {
@@ -209,6 +235,19 @@ function calcHCP(hand){
 function suitCount(hand, suit){
   var c=0; for (var i=0;i<hand.length;i++){ if (hand[i].suit===suit) c++; } return c;
 }
+// Puntos de apoyo: al subir el palo del compañero con 4+ cartas, se suman puntos por
+// distribución en los palos QUE NO son el de triunfo (vacío=5, singleton=3, doubleton=1).
+function supportPoints(hand, trumpSuit){
+  var pts = 0;
+  SUITS.forEach(function(s){
+    if (s===trumpSuit) return;
+    var c = suitCount(hand, s);
+    if (c===0) pts += 5;
+    else if (c===1) pts += 3;
+    else if (c===2) pts += 1;
+  });
+  return pts;
+}
 function cardStr(c){ return c.rank + c.suit; }
 function deepClone(o){ return JSON.parse(JSON.stringify(o)); }
 function partnerOf(seat){ return {N:'S',S:'N',E:'W',W:'E'}[seat]; }
@@ -216,7 +255,7 @@ function partnershipOf(seat){ return (seat==='N'||seat==='S') ? 'NS' : 'EW'; }
 function nextSeatCW(seat){ return SEATS[(SEATS.indexOf(seat)+1)%4]; }
 
 /* ============ BIDDING ============ */
-function suggestOpeningBidObj(hand){
+function suggestOpeningBidObj(hand, conv){
   var hcp = calcHCP(hand);
   var counts = SUITS.map(function(s){ return {suit:s, count:suitCount(hand,s)}; });
   var longest = counts.reduce(function(a,b){ return b.count>a.count?b:a; });
@@ -228,19 +267,43 @@ function suggestOpeningBidObj(hand){
   if (hcp>=22) return {level:2, suit:'♣'};
   if (hcp>=12 && hcp<=19 && longest.count>=5) return {level:1, suit:longest.suit};
   if (hcp>=12 && hcp<=19) return {level:1, suit:'♣'};
+  if (conv && hcp>=6 && hcp<=10 && longest.count>=6 && longest.suit!=='♣') return {level:2, suit:longest.suit};
   return null;
 }
-function suggestOpeningBid(hand){
-  var o = suggestOpeningBidObj(hand);
+function suggestOpeningBid(hand, conv){
+  var o = suggestOpeningBidObj(hand, conv);
   return o ? (o.level + o.suit) : 'PASO';
 }
-function aiRespondToBid(hand, partnerBid){
+// Respuesta a una apertura débil de 2 (6-10 PH, palo de 6+): el compañero tiene poca
+// fuerza, así que aquí no se "invita" como tras una apertura normal — o subes con ajuste
+// buscando el efecto preventivo, o tomas el mando con una mano fuerte propia, o pasas.
+function aiRespondToWeakTwo(hand, partnerBid){
   var hcp = calcHCP(hand);
+  var support = suitCount(hand, partnerBid.suit);
+  var totalPts = hcp + supportPoints(hand, partnerBid.suit);
+  if (support>=3 && totalPts>=16) return {level:4, suit:partnerBid.suit};
+  if (support>=3 && totalPts>=11) return {level:3, suit:partnerBid.suit};
+  if (hcp>=16) return {level:3, suit:'NT'};
+  return null;
+}
+function aiRespondToBid(hand, partnerBid, conv){
+  var hcp = calcHCP(hand);
+  if (conv && partnerBid.level===1 && partnerBid.suit==='NT'){
+    var majors4 = ['♠','♥'].filter(function(s){ return suitCount(hand,s)>=4; });
+    if (hcp>=8 && majors4.length>0) return {level:2, suit:'♣'}; // Stayman: pregunta por palo mayor
+  }
+  if (conv && partnerBid.level===2 && ['♦','♥','♠'].indexOf(partnerBid.suit)>-1){
+    return aiRespondToWeakTwo(hand, partnerBid);
+  }
   if (partnerBid.suit !== 'NT'){
     var support = suitCount(hand, partnerBid.suit);
-    if (support>=4 && hcp>=6 && hcp<=10) return {level:partnerBid.level+1, suit:partnerBid.suit};
-    if (support>=4 && hcp>=11 && hcp<=14) return {level:partnerBid.level+2, suit:partnerBid.suit};
-    if (support>=3 && hcp>=15) return {level:partnerBid.level+3, suit:partnerBid.suit};
+    if (support>=4){
+      var totalPts = hcp + supportPoints(hand, partnerBid.suit);
+      if (conv && totalPts>=16) return {level:4, suit:'NT'}; // Blackwood: gran ajuste + valores de slam
+      if (totalPts>=6 && totalPts<=10) return {level:partnerBid.level+1, suit:partnerBid.suit};
+      if (totalPts>=11 && totalPts<=14) return {level:partnerBid.level+2, suit:partnerBid.suit};
+      if (totalPts>=15) return {level:partnerBid.level+3, suit:partnerBid.suit};
+    }
   }
   var newSuits = SUITS.map(function(s){return {suit:s, count:suitCount(hand,s)};})
     .filter(function(c){ return c.count>=4 && c.suit!==partnerBid.suit; })
@@ -251,28 +314,85 @@ function aiRespondToBid(hand, partnerBid){
   if (hcp>=13) return {level:3, suit:'NT'};
   return null;
 }
+// Stayman, respuesta del abridor (2♦ = no tiene mayor de 4; 2♥/2♠ = la tiene)
+function staymanAnswer(hand){
+  var majors = ['♠','♥'].filter(function(s){ return suitCount(hand,s)>=4; });
+  if (majors.length){
+    var chosen = majors.length===2 ? (suitCount(hand,'♠')>=suitCount(hand,'♥') ? '♠' : '♥') : majors[0];
+    return {level:2, suit:chosen};
+  }
+  return {level:2, suit:'♦'};
+}
+// Stayman, remate de quien preguntó una vez oída la respuesta del abridor
+function staymanComplete(hand, openerAnswer){
+  var hcp = calcHCP(hand);
+  if (openerAnswer && openerAnswer!=='PASS' && openerAnswer.suit!=='♦'){
+    var major = openerAnswer.suit;
+    if (suitCount(hand, major)>=4) return {level: hcp>=10?4:3, suit:major};
+  }
+  return {level: hcp>=10?3:2, suit:'NT'};
+}
+// Blackwood: 4SA pregunta ases. Respuesta: 5♣=0 o 4 ases, 5♦=1, 5♥=2, 5♠=3.
+var BLACKWOOD_STEPS = ['♣','♦','♥','♠'];
+function blackwoodAnswer(hand){
+  var aces = hand.filter(function(c){ return c.rank==='A'; }).length;
+  return {level:5, suit:BLACKWOOD_STEPS[aces % 4]};
+}
+function blackwoodComplete(hand, openerAnswer, agreedSuit){
+  var partnerAces = (openerAnswer && openerAnswer!=='PASS') ? BLACKWOOD_STEPS.indexOf(openerAnswer.suit) : 0;
+  var myAces = hand.filter(function(c){ return c.rank==='A'; }).length;
+  if (myAces + partnerAces >= 3) return {level:6, suit:agreedSuit};
+  return {level:5, suit:agreedSuit};
+}
 function bidRank(bid){ return bid.level*5 + STRAIN_ORDER.indexOf(bid.suit); }
 function aiDecideBid(seat, hand){
   var g = state.game;
-  var highestEntry = null;
-  for (var i=g.auctionHistory.length-1;i>=0;i--){
-    if (g.auctionHistory[i].bid !== 'PASS'){ highestEntry = g.auctionHistory[i]; break; }
-  }
-  var partner = partnerOf(seat);
-  var ownBidExists = g.auctionHistory.some(function(e){
-    return e.bid !== 'PASS' && e.seat === seat;
-  });
+  var conv = !!g.conventionsOn;
   var candidate = null;
-  if (!ownBidExists && highestEntry && highestEntry.seat === partner){
-    candidate = aiRespondToBid(hand, highestEntry.bid);
-  } else if (!ownBidExists && !highestEntry){
-    candidate = suggestOpeningBidObj(hand);
-  } else if (!ownBidExists && highestEntry && partnershipOf(highestEntry.seat) !== partnershipOf(seat)){
-    candidate = suggestOpeningBidObj(hand);
+
+  if (conv && g.staymanActive){
+    if (g.staymanActive.stage==='asked' && g.staymanActive.opener===seat){
+      candidate = staymanAnswer(hand);
+    } else if (g.staymanActive.stage==='answered' && g.staymanActive.asker===seat){
+      var lastEntry = g.auctionHistory[g.auctionHistory.length-1];
+      candidate = staymanComplete(hand, lastEntry ? lastEntry.bid : null);
+    }
   }
+
+  if (!candidate && conv && g.blackwoodActive){
+    if (g.blackwoodActive.stage==='asked' && g.blackwoodActive.opener===seat){
+      candidate = blackwoodAnswer(hand);
+    } else if (g.blackwoodActive.stage==='answered' && g.blackwoodActive.asker===seat){
+      var lastBwEntry = g.auctionHistory[g.auctionHistory.length-1];
+      candidate = blackwoodComplete(hand, lastBwEntry ? lastBwEntry.bid : null, g.blackwoodActive.agreedSuit);
+    }
+  }
+
+  if (!candidate){
+    var highestEntry = null;
+    for (var i=g.auctionHistory.length-1;i>=0;i--){
+      if (g.auctionHistory[i].bid !== 'PASS'){ highestEntry = g.auctionHistory[i]; break; }
+    }
+    var partner = partnerOf(seat);
+    var ownBidExists = g.auctionHistory.some(function(e){
+      return e.bid !== 'PASS' && e.seat === seat;
+    });
+    if (!ownBidExists && highestEntry && highestEntry.seat === partner){
+      candidate = aiRespondToBid(hand, highestEntry.bid, conv);
+    } else if (!ownBidExists && !highestEntry){
+      candidate = suggestOpeningBidObj(hand, conv);
+    } else if (!ownBidExists && highestEntry && partnershipOf(highestEntry.seat) !== partnershipOf(seat)){
+      candidate = suggestOpeningBidObj(hand, conv);
+    }
+  }
+
   if (!candidate) return 'PASS';
   candidate.level = Math.min(candidate.level, 7);
-  var rank = highestEntry ? bidRank(highestEntry.bid) : -1;
+  var highestEntry2 = null;
+  for (var j=g.auctionHistory.length-1;j>=0;j--){
+    if (g.auctionHistory[j].bid !== 'PASS'){ highestEntry2 = g.auctionHistory[j]; break; }
+  }
+  var rank = highestEntry2 ? bidRank(highestEntry2.bid) : -1;
   while (bidRank(candidate) <= rank && candidate.level < 7){ candidate.level++; }
   if (bidRank(candidate) <= rank) return 'PASS';
   return candidate;
@@ -297,6 +417,27 @@ function computeScore(level, suit, tricksWon, vulnerable){
   if (level===7) total += vulnerable?1500:1000;
   return total;
 }
+// Bonificación de honores: 4 o 5 de los 5 honores de triunfo (A,K,Q,J,10) en UNA sola
+// mano, o los 4 ases en una sola mano si el contrato es SA. Se cobra siempre, gane o
+// pierda el contrato, y no depende de quién declare.
+function computeHonorsBonus(hands, trump){
+  var best = {side:null, bonus:0, detail:null};
+  SEATS.forEach(function(seat){
+    var hand = hands[seat];
+    if (trump!=='NT'){
+      var topHonors = ['A','K','Q','J','10'];
+      var have = hand.filter(function(c){ return c.suit===trump && topHonors.indexOf(c.rank)>-1; }).length;
+      if (have>=4){
+        var bonus = have===5 ? 150 : 100;
+        if (bonus>best.bonus){ best = {side:partnershipOf(seat), bonus:bonus, detail:have+' honores de '+trump+' en '+SEAT_NAMES[seat].split(' ')[0]}; }
+      }
+    } else {
+      var aces = hand.filter(function(c){ return c.rank==='A'; }).length;
+      if (aces===4 && 150>best.bonus){ best = {side:partnershipOf(seat), bonus:150, detail:'4 ases en '+SEAT_NAMES[seat].split(' ')[0]}; }
+    }
+  });
+  return best;
+}
 
 /* ============ AI CARD PLAY ============ */
 function getValidMoves(hand, trickCards, trump){
@@ -319,13 +460,79 @@ function trickWinner(trickCards, trump){
   }
   return best;
 }
-function aiChooseCard(hand, trickCards, trump){
+function isDefendingSeat(g, seat){
+  return !!(g && g.declarerSide && partnershipOf(seat) !== g.declarerSide);
+}
+// Al liderar una baza en defensa, prioriza devolver el palo que ganó el compañero en la
+// baza anterior, o el palo que el compañero "animó" con un descarte alto cuando no pudo
+// seguir palo. Si ninguna de las dos aplica, se cae al criterio normal (palo más largo).
+function chooseDefenderLead(hand, g, seat){
+  var partner = partnerOf(seat);
+  if (g.tricks.length>0){
+    var lastTrick = g.tricks[g.tricks.length-1];
+    if (lastTrick.winner === partner){
+      var pc = lastTrick.cards.filter(function(c){ return c.seat===partner; })[0];
+      if (pc && suitCount(hand, pc.card.suit)>0){
+        var opts = hand.filter(function(c){ return c.suit===pc.card.suit; }).sort(function(a,b){ return a.value-b.value; });
+        return opts[0];
+      }
+    }
+  }
+  var encouraged = findEncouragedSuit(g, partner);
+  if (encouraged && suitCount(hand, encouraged)>0){
+    var opts2 = hand.filter(function(c){ return c.suit===encouraged; }).sort(function(a,b){ return a.value-b.value; });
+    return opts2[0];
+  }
+  return null;
+}
+function findEncouragedSuit(g, partner){
+  for (var i=g.tricks.length-1;i>=0;i--){
+    var t = g.tricks[i];
+    var leadSuit = t.cards[0].card.suit;
+    var pcArr = t.cards.filter(function(c){ return c.seat===partner; });
+    if (!pcArr.length) continue;
+    var pc = pcArr[0];
+    if (pc.card.suit!==leadSuit && pc.card.suit!==g.trump && pc.card.value>=8) return pc.card.suit;
+  }
+  return null;
+}
+// Al descartar (no puede seguir palo ni ganar la baza de ninguna forma), descarta del
+// palo más corto que no sea triunfo; dentro de ese palo, alto si guarda A/K ahí (anima
+// al compañero a seguir ese palo) o bajo si no (desanima).
+function chooseSignalDiscard(hand, trump){
+  var nonTrumpSuits = SUITS.filter(function(s){ return s!==trump && suitCount(hand,s)>0; });
+  if (!nonTrumpSuits.length) return null;
+  nonTrumpSuits.sort(function(a,b){ return suitCount(hand,a)-suitCount(hand,b); });
+  var suit = nonTrumpSuits[0];
+  var cardsInSuit = hand.filter(function(c){ return c.suit===suit; }).sort(function(a,b){ return a.value-b.value; });
+  var hasStrength = cardsInSuit.some(function(c){ return c.rank==='A' || c.rank==='K'; });
+  return hasStrength ? cardsInSuit[cardsInSuit.length-1] : cardsInSuit[0];
+}
+// "Top of touching honors": si el palo de salida tiene una secuencia de honores
+// consecutivos (KQJ, QJ10, AKQ...), se saca la carta más alta de la secuencia en vez de
+// la más baja — regla estándar de salidas contra palo.
+function topOfSequenceLead(hand, suit){
+  var cards = hand.filter(function(c){ return c.suit===suit; }).sort(function(a,b){ return b.value-a.value; });
+  if (cards.length<3 || cards[0].value<11) return null; // exige que la secuencia empiece en J o más alto
+  var runLen = 1;
+  for (var i=0;i<cards.length-1;i++){
+    if (cards[i].value - cards[i+1].value === 1) runLen++; else break;
+  }
+  return runLen>=3 ? cards[0] : null;
+}
+function aiChooseCard(hand, trickCards, trump, ctx){
   var valid = getValidMoves(hand, trickCards, trump);
   if (trickCards.length===0){
+    if (ctx && ctx.g && ctx.seat && isDefendingSeat(ctx.g, ctx.seat)){
+      var lead = chooseDefenderLead(hand, ctx.g, ctx.seat);
+      if (lead) return lead;
+    }
     var counts = SUITS.map(function(s){return {suit:s,count:suitCount(hand,s)};})
       .filter(function(c){return c.count>0;})
       .sort(function(a,b){ return b.count-a.count; });
     var leadSuit = counts[0] ? counts[0].suit : hand[0].suit;
+    var seqLead = topOfSequenceLead(hand, leadSuit);
+    if (seqLead) return seqLead;
     var opts = hand.filter(function(c){return c.suit===leadSuit;}).sort(function(a,b){return a.value-b.value;});
     return opts[0];
   }
@@ -335,6 +542,11 @@ function aiChooseCard(hand, trickCards, trump){
     return trickWinner(trial, trump).card === c;
   });
   var sorted = valid.slice().sort(function(a,b){return a.value-b.value;});
+  var isDiscard = valid.length===hand.length && canWin.length===0;
+  if (isDiscard && ctx && ctx.g && ctx.seat && isDefendingSeat(ctx.g, ctx.seat)){
+    var discard = chooseSignalDiscard(hand, trump);
+    if (discard) return discard;
+  }
   if (position===3){
     if (canWin.length){ canWin.sort(function(a,b){return a.value-b.value;}); return canWin[0]; }
     return sorted[0];
@@ -376,13 +588,37 @@ function getProfile(){
     var p = JSON.parse(localStorage.getItem(LS_PROFILE));
     if (p) return p;
   }catch(e){}
-  var def = {name:'Jugador', elo:1200, streak:0, bestStreak:0, createdAt:new Date().toISOString(), settings:{sound:true, theme:'dark', coach:true}};
+  var def = {name:'Jugador', elo:1200, streak:0, bestStreak:0, createdAt:new Date().toISOString(), settings:{sound:true, theme:'dark', coach:true, conventions:false}};
   localStorage.setItem(LS_PROFILE, JSON.stringify(def));
   return def;
 }
 function saveProfile(p){ localStorage.setItem(LS_PROFILE, JSON.stringify(p)); }
 function getSettings(){ return getProfile().settings || {sound:true}; }
 function coachEnabled(){ var s=getSettings(); return s.coach!==false; }
+function conventionsEnabled(){ var s=getSettings(); return s.conventions===true; }
+function lottEnabled(){ var s=getSettings(); return s.lott===true; }
+// Guía LOTT (nivel del ajuste), opcional y aparte del motor de subasta: NO decide pujas
+// por nadie, solo añade una nota informativa al coach cuando la subasta es competitiva.
+// Precisión aproximada 65-75% según simulaciones publicadas (Vernes / Cohen); nuestra IA
+// no ve las manos de los rivales, así que la longitud del compañero es una estimación,
+// no un dato real. Por eso va desactivada por defecto y con este aviso siempre visible.
+function suggestLottLevel(g, hand, seat){
+  var partner = partnerOf(seat);
+  var ownSuit = null, oppHasBid = false;
+  g.auctionHistory.forEach(function(e){
+    if (e.bid==='PASS' || e.bid.suit==='NT') return;
+    if (partnershipOf(e.seat)===partnershipOf(seat)){ if (!ownSuit) ownSuit = e.bid.suit; }
+    else oppHasBid = true;
+  });
+  if (!ownSuit || !oppHasBid) return null;
+  var partnerOpenedIt = g.auctionHistory.some(function(e){
+    return e.seat===partner && e.bid!=='PASS' && e.bid.suit===ownSuit && e.bid.level===1;
+  });
+  var estimatedPartnerLength = partnerOpenedIt ? 5 : 4;
+  var fit = suitCount(hand, ownSuit) + estimatedPartnerLength;
+  if (fit<8) return null;
+  return {suit:ownSuit, fit:fit, level: Math.min(fit-6, 7)};
+}
 function bidToStr(bid){ return bid==='PASS' ? 'pasar' : (bid.level+bid.suit); }
 function bidsEqual(a,b){
   if (a==='PASS' && b==='PASS') return true;
@@ -390,13 +626,54 @@ function bidsEqual(a,b){
   return a.level===b.level && a.suit===b.suit;
 }
 function coachCardReason(position, recommended, g){
+  var trick = (g && g.trickCards) ? g.trickCards : [];
   var base;
-  if (position===0) base = 'al salir conviene sacar una carta baja del palo más largo';
-  else if (position===1) base = 'en segunda posición, si no puedes ganar barato, juega baja ("segunda mano baja")';
-  else if (position===2) base = 'en tercera posición conviene jugar alto para intentar ganar la baza ("tercera mano alta")';
-  else base = 'en última posición, gana la baza lo más barato posible si puedes';
+  if (position===0){
+    base = 'al salir, saca una carta baja de tu palo más largo';
+    if (g && g.tricks.length===0 && isDefendingSeat(g, g.turn)){
+      var myHand = g.hands[g.turn] || [];
+      var longest = SUITS.map(function(s){ return {suit:s, count:suitCount(myHand,s)}; })
+        .sort(function(a,b){ return b.count-a.count; })[0];
+      if (longest && longest.count>0){
+        base += '; en tu mano, el más largo es '+longest.suit+' ('+longest.count+' cartas)';
+      }
+    }
+  } else if (position===1){
+    var ledSeat = trick[0] ? SEAT_NAMES[trick[0].seat].split(' ')[0] : 'el jugador anterior';
+    var ledCard = trick[0] ? cardStr(trick[0].card) : '';
+    base = ledSeat+' ha salido con '+ledCard+'; en segunda posición, si no puedes ganar barato, juega baja ("segunda mano baja")';
+  } else if (position===2){
+    var winnerSoFar = (g && trick.length) ? trickWinner(trick, g.trump) : null;
+    base = winnerSoFar
+      ? ('de momento gana '+cardStr(winnerSoFar.card)+' en la mesa; en tercera posición, intenta superarla jugando alto ("tercera mano alta")')
+      : 'en tercera posición conviene jugar alto para intentar ganar la baza ("tercera mano alta")';
+  } else {
+    var willWin = (g && trick.length) ? (trickWinner(trick.concat([{seat:'x', card:recommended}]), g.trump).card === recommended) : false;
+    var tableCards = trick.map(function(t){ return cardStr(t.card); }).join(', ');
+    base = willWin
+      ? ('esta carta gana la baza (supera lo que hay en la mesa: '+tableCards+')')
+      : ('no puedes ganar esta baza con lo que hay en la mesa ('+tableCards+'); mejor descartar tu carta más floja que desperdiciar algo útil');
+  }
   var msg = 'Lola (coach): '+base+'. Sugerida: '+cardStr(recommended)+'.';
   if (!g || !g.declarer) return msg;
+
+  // Nota de progreso (solo con datos públicos: bazas hechas, contrato, bazas que quedan
+  // por jugar — nunca mirando manos que ese jugador no vería en una mesa real). Se omite
+  // en las primeras bazas porque ahí no aporta nada que no sea obvio.
+  if (g.tricks.length>=3){
+    var declarerTricks = g.declarerSide==='NS' ? (g.tricksWon.N+g.tricksWon.S) : (g.tricksWon.E+g.tricksWon.W);
+    var needed = g.level+6;
+    var remaining = 13 - g.tricks.length;
+    var stillNeeded = needed - declarerTricks;
+    var onDeclaringSide = (g.turn===g.declarer || g.turn===g.dummy);
+    if (stillNeeded>0){
+      msg += onDeclaringSide
+        ? (' Te faltan '+stillNeeded+' baza'+(stillNeeded===1?'':'s')+' de '+remaining+' que quedan.')
+        : (' El declarante necesita '+stillNeeded+' más de '+remaining+' que quedan.');
+    } else {
+      msg += onDeclaringSide ? ' Contrato ya asegurado con las bazas hechas.' : ' El declarante ya tiene aseguradas las bazas del contrato.';
+    }
+  }
 
   // Solo tiene sentido combinar manos si quien pide la pista es declarante o el muerto
   // (mismo bando); un defensor no comparte mano con el muerto del rival.
@@ -451,15 +728,70 @@ function detectFinesses(hands, seatA, seatB, trump){
   });
   return found;
 }
+// Losing Trick Count (LTC): método estándar de libro de iniciación, evalúa una mano
+// SOLA (no combinada). Para cada palo, mira las 3 cartas más altas que tengas (o menos
+// si el palo es más corto) y cuenta como "perdedora" cada una de As/Rey/Dama que falte
+// entre esas cartas. Se usa sobre todo para valorar el potencial de la subasta, no es
+// una predicción exacta de bazas jugadas.
+function countLosers(hand){
+  var losers = 0;
+  SUITS.forEach(function(s){
+    var count = suitCount(hand, s);
+    var slots = Math.min(count, 3);
+    if (slots===0) return;
+    var have = {};
+    hand.filter(function(c){ return c.suit===s; }).forEach(function(c){ have[c.rank]=true; });
+    var need = ['A','K','Q'].slice(0, slots);
+    need.forEach(function(r){ if (!have[r]) losers++; });
+  });
+  return losers;
+}
 function buildHandInsights(g){
   if (g.declarerSide!=='NS' || !g.initialHands) return null;
   var tt = combinedTopTricks(g.initialHands, g.declarer, g.dummy);
   var finesses = detectFinesses(g.initialHands, g.declarer, g.dummy, g.trump);
+  var ltc = countLosers(g.initialHands[g.declarer]) + countLosers(g.initialHands[g.dummy]);
   var lines = ['Bazas seguras estimadas al reparto (contando solo secuencias de honores desde arriba, sin desarrollar palos): '+tt.total+'.'];
+  lines.push('Perdedoras estimadas (Losing Trick Count, declarante+muerto): '+ltc+'.');
   if (finesses.length){
     lines.push('Posición de finesse (As y Dama sin el Rey) en: '+finesses.join(', ')+'.');
   }
+  var playLines = suggestPlayLines(g);
+  playLines.forEach(function(l){ lines.push(l); });
   return lines.join(' ');
+}
+// Un par de reglas de libro más, en el mismo espíritu que las de arriba: guía de
+// iniciación, no un análisis de solver — en la mano real el orden correcto puede diferir.
+function suggestPlayLines(g){
+  if (g.declarerSide!=='NS' || !g.initialHands) return [];
+  var declarerHand = g.initialHands[g.declarer];
+  var dummyHand = g.initialHands[g.dummy];
+  var trump = g.trump;
+  var lines = [];
+
+  if (trump!=='NT'){
+    var ruffCandidates = SUITS.filter(function(s){
+      if (s===trump) return false;
+      var dCount = suitCount(dummyHand, s);
+      var declCount = suitCount(declarerHand, s);
+      return dCount<=1 && declCount>=3 && suitCount(dummyHand, trump)>=2;
+    });
+    if (ruffCandidates.length){
+      lines.push('El muerto tiene poco '+ruffCandidates[0]+' y tú varias cartas ahí: considera fallar esas perdedoras en el muerto antes de sacar todos los triunfos.');
+    }
+  }
+
+  var longSuitCandidates = SUITS.filter(function(s){
+    return s!==trump && (suitCount(declarerHand,s)+suitCount(dummyHand,s))>=5;
+  }).sort(function(a,b){
+    return (suitCount(declarerHand,b)+suitCount(dummyHand,b)) - (suitCount(declarerHand,a)+suitCount(dummyHand,a));
+  });
+  if (longSuitCandidates.length){
+    var s1 = longSuitCandidates[0];
+    var combinedLen = suitCount(declarerHand,s1)+suitCount(dummyHand,s1);
+    lines.push('Tenéis '+combinedLen+' cartas combinadas en '+s1+'; si hay entradas para cobrarlo, establecerlo pronto puede convertir cartas bajas en bazas.');
+  }
+  return lines;
 }
 function renderFullAnalysisPanel(g){
   var declarerTricks = g.tricksWon.N + g.tricksWon.S;
@@ -467,6 +799,8 @@ function renderFullAnalysisPanel(g){
   var made = declarerTricks >= needed;
   var tt = combinedTopTricks(g.initialHands, g.declarer, g.dummy);
   var finesses = detectFinesses(g.initialHands, g.declarer, g.dummy, g.trump);
+  var ltcDeclarer = countLosers(g.initialHands[g.declarer]);
+  var ltcDummy = countLosers(g.initialHands[g.dummy]);
   var panel = el('div',{class:'card-panel'});
   panel.appendChild(el('h3',{},[txt('📊 Análisis completo')]));
   panel.appendChild(el('p',{style:'font-size:11.5px;color:var(--muted);margin-top:-4px;'},[
@@ -483,13 +817,23 @@ function renderFullAnalysisPanel(g){
   panel.appendChild(el('p',{style:'font-size:13px;margin-top:8px;'},[
     txt('Total de bazas seguras estimadas al reparto: '+tt.total+'.')
   ]));
+  panel.appendChild(el('p',{style:'font-size:13px;'},[
+    txt('Perdedoras estimadas (Losing Trick Count): '+ltcDeclarer+' ('+SEAT_NAMES[g.declarer].split(' ')[0]+') + '+ltcDummy+' ('+SEAT_NAMES[g.dummy].split(' ')[0]+') = '+(ltcDeclarer+ltcDummy)+' total.')
+  ]));
+  panel.appendChild(el('p',{style:'font-size:11px;color:var(--muted);margin-top:-6px;'},[
+    txt('El LTC es una guía de subasta (menos perdedoras = mano más fuerte), no una predicción exacta de bazas.')
+  ]));
   if (finesses.length){
     panel.appendChild(el('p',{style:'font-size:13px;'},[txt('Finesse (As+Dama sin Rey) en: '+finesses.join(', ')+'.')]));
   } else {
     panel.appendChild(el('p',{style:'font-size:13px;color:var(--muted);'},[txt('No se detectan posiciones de finesse claras (As+Dama sin Rey) en palos que no sean triunfo.')]));
   }
+  var playLines = suggestPlayLines(g);
+  playLines.forEach(function(l){
+    panel.appendChild(el('p',{style:'font-size:13px;'},[txt(l)]));
+  });
   panel.appendChild(el('p',{style:'font-size:11.5px;color:var(--muted);margin-top:8px;'},[
-    txt('Consejo general: si tienes el control, saca los triunfos pronto; desarrolla cuanto antes tu palo más largo para convertir cartas bajas en bazas.')
+    txt('Consejo general: si tienes el control, saca los triunfos pronto; desarrolla cuanto antes tu palo más largo para convertir cartas bajas en bazas. Todo esto es guía de iniciación, no un análisis de solver — en la mano real el orden correcto puede diferir.')
   ]));
   return panel;
 }
@@ -512,18 +856,140 @@ function getAchievements(games, profile){
   var wins = games.filter(function(g){return g.userWon;});
   var slams = games.filter(function(g){return g.declarerSide==='NS' && g.result==='MAKE' && g.level>=6;});
   var defends = games.filter(function(g){return g.declarerSide==='EW' && g.result==='DOWN';});
+  var tut = getTutorialStatus(games);
   return [
     {icon:'🎯', name:'Primera partida', unlocked: games.length>=1},
     {icon:'🔟', name:'10 partidas', unlocked: games.length>=10},
     {icon:'🏆', name:'Primera victoria', unlocked: wins.length>=1},
     {icon:'🔥', name:'Racha de 3', unlocked: (profile.bestStreak||0)>=3},
     {icon:'💎', name:'Slam cumplido', unlocked: slams.length>=1},
-    {icon:'🛡️', name:'Buena defensa', unlocked: defends.length>=1}
+    {icon:'🛡️', name:'Buena defensa', unlocked: defends.length>=1},
+    {icon:'📚', name:'Lecciones completas', unlocked: tut.opening.complete && tut.response.complete && tut.card.complete}
   ];
+}
+var LESSONS = [
+  {id:'opening', icon:'🚪', title:'Lección 1 · Apertura', needed:5,
+   desc:'Cuando te toca abrir la subasta (eres el primero en pujar), decide según tus puntos de honor (PH) y tu palo más largo: 12-19 PH abre a nivel 1 (el palo más largo si tiene 5+ cartas, si no ♣); 15-17 PH equilibrado abre 1 SA; menos de 12 PH, generalmente pasas.',
+   field:'coachOpeningCorrect'},
+  {id:'response', icon:'🤝', title:'Lección 2 · Respuestas', needed:5,
+   desc:'Cuando tu compañero abre y te toca hablar por primera vez: con 4+ cartas de su palo, súbelo según tus PH (6-10 sube un nivel, 11-14 dos niveles, 15+ tres); sin apoyo, muestra un palo propio de 4+ cartas o responde a SA según tus PH.',
+   field:'coachResponseCorrect'},
+  {id:'card', icon:'🃏', title:'Lección 3 · Juego de la carta', needed:15,
+   desc:'Al salir, saca del palo más largo. En segunda posición juega bajo. En tercera posición juega alto para intentar ganar la baza. En última posición, gana lo más barato posible si puedes.',
+   field:'coachCardCorrect'}
+];
+function getTutorialStatus(games){
+  var status = {};
+  LESSONS.forEach(function(l){
+    var done = games.reduce(function(a,g){ return a + (g[l.field]||0); }, 0);
+    status[l.id] = {done: done, needed: l.needed, complete: done>=l.needed};
+  });
+  return status;
+}
+// Manos guiadas: una por categoría. La explicación NUNCA lleva números escritos a mano —
+// se calcula en el momento con calcHCP/bidToStr sobre la mano real, para que no pueda
+// desincronizarse del contenido (a diferencia de un texto fijo).
+var INTERACTIVE_LESSONS = {
+  opening: [
+    {
+      title: 'Apertura equilibrada',
+      hand: [
+        {suit:'♠',rank:'A',value:14},{suit:'♠',rank:'Q',value:12},{suit:'♠',rank:'5',value:5},{suit:'♠',rank:'2',value:2},
+        {suit:'♥',rank:'K',value:13},{suit:'♥',rank:'J',value:11},{suit:'♥',rank:'8',value:8},
+        {suit:'♦',rank:'K',value:13},{suit:'♦',rank:'9',value:9},{suit:'♦',rank:'3',value:3},
+        {suit:'♣',rank:'Q',value:12},{suit:'♣',rank:'7',value:7},{suit:'♣',rank:'4',value:4}
+      ]
+    },
+    {
+      title: 'Apertura de palo largo',
+      hand: [
+        {suit:'♠',rank:'A',value:14},{suit:'♠',rank:'Q',value:12},{suit:'♠',rank:'J',value:11},{suit:'♠',rank:'9',value:9},{suit:'♠',rank:'7',value:7},{suit:'♠',rank:'4',value:4},
+        {suit:'♥',rank:'K',value:13},{suit:'♥',rank:'5',value:5},
+        {suit:'♦',rank:'8',value:8},{suit:'♦',rank:'3',value:3},
+        {suit:'♣',rank:'A',value:14},{suit:'♣',rank:'6',value:6},{suit:'♣',rank:'4',value:4}
+      ]
+    }
+  ],
+  response: [
+    {
+      title: 'Apoyo al compañero',
+      partnerBid: {level:1, suit:'♥'},
+      hand: [
+        {suit:'♠',rank:'8',value:8},{suit:'♠',rank:'3',value:3},{suit:'♠',rank:'2',value:2},
+        {suit:'♥',rank:'Q',value:12},{suit:'♥',rank:'J',value:11},{suit:'♥',rank:'9',value:9},{suit:'♥',rank:'4',value:4},
+        {suit:'♦',rank:'A',value:14},{suit:'♦',rank:'7',value:7},
+        {suit:'♣',rank:'J',value:11},{suit:'♣',rank:'6',value:6},{suit:'♣',rank:'5',value:5},{suit:'♣',rank:'2',value:2}
+      ]
+    },
+    {
+      title: 'Apoyo con puntos de distribución',
+      partnerBid: {level:1, suit:'♠'},
+      hand: [
+        {suit:'♠',rank:'K',value:13},{suit:'♠',rank:'Q',value:12},{suit:'♠',rank:'8',value:8},{suit:'♠',rank:'3',value:3},
+        {suit:'♥',rank:'A',value:14},
+        {suit:'♦',rank:'7',value:7},{suit:'♦',rank:'4',value:4},
+        {suit:'♣',rank:'J',value:11},{suit:'♣',rank:'9',value:9},{suit:'♣',rank:'6',value:6},{suit:'♣',rank:'5',value:5},{suit:'♣',rank:'4',value:4},{suit:'♣',rank:'2',value:2}
+      ]
+    }
+  ],
+  card: [
+    {
+      title: 'Segunda mano baja',
+      trickCards: [{seat:'W', card:{suit:'♦',rank:'5',value:5}}],
+      trump: '♥',
+      hand: [
+        {suit:'♠',rank:'A',value:14},{suit:'♠',rank:'9',value:9},
+        {suit:'♥',rank:'K',value:13},{suit:'♥',rank:'8',value:8},
+        {suit:'♦',rank:'Q',value:12},{suit:'♦',rank:'7',value:7},{suit:'♦',rank:'4',value:4},{suit:'♦',rank:'3',value:3},
+        {suit:'♣',rank:'J',value:11},{suit:'♣',rank:'6',value:6},{suit:'♣',rank:'5',value:5},{suit:'♣',rank:'4',value:4},{suit:'♣',rank:'2',value:2}
+      ]
+    },
+    {
+      title: 'Tercera mano alta',
+      trickCards: [{seat:'W', card:{suit:'♠',rank:'2',value:2}}, {seat:'N', card:{suit:'♠',rank:'9',value:9}}],
+      trump: '♥',
+      hand: [
+        {suit:'♠',rank:'K',value:13},{suit:'♠',rank:'8',value:8},{suit:'♠',rank:'3',value:3},
+        {suit:'♥',rank:'A',value:14},{suit:'♥',rank:'9',value:9},{suit:'♥',rank:'4',value:4},
+        {suit:'♦',rank:'Q',value:12},{suit:'♦',rank:'J',value:11},{suit:'♦',rank:'4',value:4},
+        {suit:'♣',rank:'7',value:7},{suit:'♣',rank:'5',value:5},{suit:'♣',rank:'3',value:3},{suit:'♣',rank:'2',value:2}
+      ]
+    }
+  ]
+};
+function startInteractiveLesson(categoryId, idx){
+  var list = INTERACTIVE_LESSONS[categoryId];
+  if (!list || !list.length) return;
+  var i = (typeof idx==='number' && idx>=0 && idx<list.length) ? idx : 0;
+  state.interactive = {categoryId:categoryId, lessonIndex:i, lesson:list[i], phase:'decision', pendingLevel:null, pendingSuit:null, correct:null, userAnswer:null};
+  render();
+}
+function evaluateInteractiveBid(userBid){
+  var inter = state.interactive;
+  if (!inter || inter.phase!=='decision') return;
+  var expected = (inter.categoryId==='opening')
+    ? suggestOpeningBidObj(inter.lesson.hand, false)
+    : aiRespondToBid(inter.lesson.hand, inter.lesson.partnerBid, false);
+  var expectedBid = expected || 'PASS';
+  inter.userAnswer = userBid;
+  inter.expected = expectedBid;
+  inter.correct = bidsEqual(userBid, expectedBid);
+  inter.phase = 'feedback';
+  render();
+}
+function evaluateInteractiveCard(card){
+  var inter = state.interactive;
+  if (!inter || inter.phase!=='decision') return;
+  var recommended = aiChooseCard(inter.lesson.hand, inter.lesson.trickCards, inter.lesson.trump);
+  inter.userAnswer = card;
+  inter.expected = recommended;
+  inter.correct = (card === recommended);
+  inter.phase = 'feedback';
+  render();
 }
 
 /* ============ APP STATE ============ */
-var state = { tab:'game', toastTimer:null, game:null, practiceMode:'random', selectedGame:null, rankingSeed:null, showFullAnalysis:false };
+var state = { tab:'game', toastTimer:null, game:null, practiceMode:'random', selectedGame:null, rankingSeed:null, showFullAnalysis:false, showTricksLog:false, showImport:false, interactive:null };
 
 function newEmptyGame(){
   return {
@@ -531,12 +997,80 @@ function newEmptyGame(){
     dealer:null, vulnerable:false, auctionHistory:[], pendingLevel:1, pendingSuit:'♣',
     declarer:null, declarerSide:null, dummy:null, userControlledSeats:[],
     turn:null, leader:null,
-    trickCards:[], tricks:[], tricksWon:{N:0,E:0,S:0,W:0}, history:[], trickComplete:false,
-    coachStats:{matches:0, total:0},
+    trickCards:[], tricks:[], tricksWon:{N:0,E:0,S:0,W:0}, history:[], redoStack:[], trickComplete:false,
+    coachStats:{matches:0, total:0, opening:{c:0,t:0}, response:{c:0,t:0}, card:{c:0,t:0}},
+    conventionsOn:false, staymanActive:null, blackwoodActive:null,
     phase:'setup', suggestion:null, hcp:null
   };
 }
 function genSeedId(){ return 's'+Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+// Importador de manos: admite las 4 manos completas (N, E, S, W), o solo la de Sur (S)
+// con el resto repartido al azar entre las cartas que sobran. Una línea por asiento,
+// formato "N: AKQJ 1098 76 5432" (grupos de palos en orden ♠ ♥ ♦ ♣, separados por espacio;
+// usa "-" para un palo vacío). Rechaza cualquier entrada que no cuadre exactamente.
+function parseCustomDeal(inputText){
+  if (!inputText || typeof inputText !== 'string' || !inputText.trim()){
+    return {error:'Escribe al menos una mano antes de importar.'};
+  }
+  var lines = inputText.split(/\r?\n/).map(function(l){ return l.trim(); }).filter(function(l){ return l.length>0; });
+  var seatAliases = {N:'N', NORTE:'N', NORTH:'N', S:'S', SUR:'S', SOUTH:'S', E:'E', ESTE:'E', EAST:'E', W:'W', OESTE:'W', WEST:'W'};
+  var rankAliases = {A:'A', K:'K', Q:'Q', J:'J', T:'10', '9':'9', '8':'8', '7':'7', '6':'6', '5':'5', '4':'4', '3':'3', '2':'2'};
+  var suitsOrder = ['♠','♥','♦','♣'];
+  var parsed = {};
+  var seenCards = {};
+
+  for (var i=0;i<lines.length;i++){
+    var line = lines[i];
+    var m = line.match(/^([A-Za-zÀ-ÿ]+)\s*[:\-]\s*(.+)$/);
+    if (!m) return {error:'No entiendo esta línea: "'+line+'". Formato: "N: AKQJ 1098 76 5432".'};
+    var seat = seatAliases[m[1].toUpperCase()];
+    if (!seat) return {error:'Asiento no reconocido: "'+m[1]+'". Usa N, E, S o W.'};
+    if (parsed[seat]) return {error:'La mano de '+SEAT_NAMES[seat]+' aparece repetida.'};
+
+    var groups = m[2].trim().split(/\s+/).filter(Boolean);
+    if (groups.length!==4) return {error:'La mano de '+SEAT_NAMES[seat]+' necesita 4 grupos (♠ ♥ ♦ ♣, en ese orden), separados por espacios.'};
+
+    var handCards = [];
+    for (var g2=0; g2<4; g2++){
+      var suit = suitsOrder[g2];
+      var part = groups[g2];
+      if (part==='-' || part==='—') continue;
+      var k = 0;
+      while (k<part.length){
+        var ch = part[k].toUpperCase();
+        var rankStr = null;
+        if (ch==='1' && part[k+1]==='0'){ rankStr='10'; k+=2; }
+        else { rankStr = rankAliases[ch]; k+=1; }
+        if (!rankStr) return {error:'Carácter no reconocido "'+ch+'" en la mano de '+SEAT_NAMES[seat]+'.'};
+        var value = RANKS.indexOf(rankStr)+2;
+        var key = rankStr+suit;
+        if (seenCards[key]) return {error:'La carta '+rankStr+suit+' aparece más de una vez.'};
+        seenCards[key] = true;
+        handCards.push({suit:suit, rank:rankStr, value:value});
+      }
+    }
+    if (handCards.length!==13){
+      return {error:'La mano de '+SEAT_NAMES[seat]+' tiene '+handCards.length+' cartas; necesita exactamente 13.'};
+    }
+    parsed[seat] = sortHand(handCards);
+  }
+
+  var seatsGiven = Object.keys(parsed);
+  if (seatsGiven.length===4){
+    return {hands:parsed};
+  }
+  if (seatsGiven.length===1 && seatsGiven[0]==='S'){
+    var remaining = createDeck().filter(function(c){ return !seenCards[c.rank+c.suit]; });
+    var shuffled = shuffle(remaining);
+    return {hands:{
+      S: parsed.S,
+      N: sortHand(shuffled.slice(0,13)),
+      E: sortHand(shuffled.slice(13,26)),
+      W: sortHand(shuffled.slice(26,39))
+    }};
+  }
+  return {error:'Da las 4 manos completas (N, E, S, W), o solo la de Sur (S) para repartir el resto al azar.'};
+}
 
 /* ============ RENDER HELPERS ============ */
 function el(tag, attrs, children){
@@ -566,10 +1100,37 @@ function showToast(msg){
   var t = el('div',{class:'toast'},[txt(msg)]);
   host.appendChild(t);
   if (state.toastTimer) clearTimeout(state.toastTimer);
-  state.toastTimer = setTimeout(function(){ host.innerHTML=''; }, 2600);
+  state.toastTimer = setTimeout(function(){ host.innerHTML=''; }, 3800);
 }
 function statBox(v,l){
   return el('div',{class:'stat-box'},[el('div',{class:'v'},[txt(String(v))]), el('div',{class:'l'},[txt(l)])]);
+}
+function suitLine(hand, suit){
+  var cards = (hand||[]).filter(function(c){ return c.suit===suit; }).sort(function(a,b){ return b.value-a.value; });
+  var ranks = cards.map(function(c){ return c.rank; }).join(' ');
+  return suit + ' ' + (ranks || '—');
+}
+function renderDiagramHand(seat, hand, opts){
+  opts = opts || {};
+  var classes = 'diagram-hand' + (opts.declarer ? ' declarer' : '') + (opts.dummy ? ' dummy' : '');
+  var div = el('div',{class:classes});
+  var tagClass = (opts.declarer||opts.dummy) ? 'seat-tag' : 'seat-tag plain';
+  var tagText = SEAT_NAMES[seat].split(' ')[0] + (opts.declarer ? ' · declara' : (opts.dummy ? ' · muerto' : ''));
+  div.appendChild(el('div',{class:tagClass},[txt(tagText)]));
+  ['♠','♥','♦','♣'].forEach(function(s){
+    div.appendChild(el('div',{class:'suitline '+(isRed(s)?'red':'black')},[txt(suitLine(hand,s))]));
+  });
+  return div;
+}
+function renderHandDiagram(hands, meta){
+  meta = meta || {};
+  var wrap = el('div',{class:'diagram'});
+  wrap.appendChild(el('div',{class:'n'},[renderDiagramHand('N', hands.N, {declarer:meta.declarer==='N', dummy:meta.dummy==='N'})]));
+  wrap.appendChild(el('div',{class:'w'},[renderDiagramHand('W', hands.W, {declarer:meta.declarer==='W', dummy:meta.dummy==='W'})]));
+  wrap.appendChild(el('div',{class:'mid'},[txt(meta.contract || '♠ ♥ ♦ ♣')]));
+  wrap.appendChild(el('div',{class:'e'},[renderDiagramHand('E', hands.E, {declarer:meta.declarer==='E', dummy:meta.dummy==='E'})]));
+  wrap.appendChild(el('div',{class:'s'},[renderDiagramHand('S', hands.S, {declarer:meta.declarer==='S', dummy:meta.dummy==='S'})]));
+  return wrap;
 }
 
 /* ============ RENDER: ROOT ============ */
@@ -601,7 +1162,7 @@ function render(){
   ]);
   app.appendChild(header);
 
-  var tabs = [{id:'game',icon:'🎯',label:'Jugar'},{id:'stats',icon:'📊',label:'Análisis'},{id:'settings',icon:'⚙️',label:'Ajustes'}];
+  var tabs = [{id:'game',icon:'🎯',label:'Jugar'},{id:'tutorial',icon:'📚',label:'Tutorial'},{id:'stats',icon:'📊',label:'Análisis'},{id:'settings',icon:'⚙️',label:'Ajustes'}];
   var nav = el('nav',{class:'tabs'});
   tabs.forEach(function(t){
     var b = el('button',{class:t.id===state.tab?'active':''},[txt(t.icon+' '+t.label)]);
@@ -611,6 +1172,7 @@ function render(){
   app.appendChild(nav);
 
   if (state.tab==='game') renderGame(app);
+  if (state.tab==='tutorial') renderTutorial(app);
   if (state.tab==='stats') renderStats(app);
   if (state.tab==='settings') renderSettings(app);
 
@@ -618,6 +1180,145 @@ function render(){
 }
 
 /* ============ RENDER: GAME TAB ============ */
+/* ============ RENDER: TUTORIAL TAB ============ */
+function renderTutorial(app){
+  if (state.interactive){
+    renderInteractiveLesson(app);
+    return;
+  }
+  var games = getGames();
+  var status = getTutorialStatus(games);
+  var intro = el('div',{class:'card-panel'});
+  intro.appendChild(el('h3',{},[txt('📚 Lecciones')]));
+  intro.appendChild(el('p',{style:'font-size:13px;color:#c9c9e6;'},[
+    txt('El progreso se completa jugando normal, con el coach activado. También puedes probar una mano guiada de ejemplo por categoría, con una única decisión y la explicación al momento.')
+  ]));
+  if (!coachEnabled()){
+    intro.appendChild(el('p',{style:'font-size:12px;color:var(--red);margin-top:6px;'},[
+      txt('El coach está desactivado en Ajustes — actívalo para que el progreso de las lecciones avance.')
+    ]));
+  }
+  app.appendChild(intro);
+
+  LESSONS.forEach(function(l){
+    var st = status[l.id];
+    var pct = Math.min(100, Math.round(st.done/st.needed*100));
+    var panel = el('div',{class:'card-panel'});
+    var head = el('div',{style:'display:flex;justify-content:space-between;align-items:center;'},[
+      el('span',{style:'font-weight:700;font-size:15px;'},[txt(l.icon+' '+l.title)]),
+      el('span',{style:'font-size:12px;color:'+(st.complete?'var(--green)':'var(--muted)')+';font-weight:700;'},[
+        txt(st.complete ? '✅ Completa' : (st.done+'/'+st.needed))
+      ])
+    ]);
+    panel.appendChild(head);
+    panel.appendChild(el('p',{style:'font-size:13px;color:var(--muted);margin:8px 0;'},[txt(l.desc)]));
+    var barOuter = el('div',{style:'background:var(--panel2);border-radius:999px;height:8px;overflow:hidden;'});
+    barOuter.appendChild(el('div',{style:'background:linear-gradient(135deg,var(--accent2),var(--accent));height:100%;width:'+pct+'%;'}));
+    panel.appendChild(barOuter);
+    var btnRow = el('div',{class:'btn-row',style:'margin-top:12px;'});
+    if (INTERACTIVE_LESSONS[l.id]){
+      var interBtn = el('button',{class:'btn btn-primary'},[txt('🎯 Mano guiada')]);
+      interBtn.addEventListener('click', function(){ startInteractiveLesson(l.id); });
+      btnRow.appendChild(interBtn);
+    }
+    if (!st.complete){
+      var practiceBtn = el('button',{class:'btn btn-secondary'},[txt('Practicar en partida libre')]);
+      practiceBtn.addEventListener('click', function(){
+        state.practiceMode = (l.id==='opening') ? 'strong' : 'random';
+        state.tab = 'game';
+        dealNewGame();
+      });
+      btnRow.appendChild(practiceBtn);
+    }
+    panel.appendChild(btnRow);
+    app.appendChild(panel);
+  });
+
+  var tip = el('div',{class:'card-panel',style:'text-align:center;color:var(--muted);font-size:12px;'},[
+    txt('El progreso de las lecciones se calcula a partir de todas tus manos jugadas — nunca se pierde ni hay que reiniciarlo por separado. La mano guiada es solo un ejemplo suelto, no cuenta para el progreso.')
+  ]);
+  app.appendChild(tip);
+}
+function renderInteractiveLesson(app){
+  var inter = state.interactive;
+  var lesson = inter.lesson;
+  var panel = el('div',{class:'card-panel'});
+  panel.appendChild(el('h3',{},[txt('🎯 '+lesson.title)]));
+  panel.appendChild(el('p',{style:'font-size:13px;color:var(--muted);'},[
+    txt('Mano de ejemplo · '+calcHCP(lesson.hand)+' PH'+(inter.categoryId==='response'?' · tu compañero abrió '+bidToStr(lesson.partnerBid):''))
+  ]));
+  var handRow = el('div',{class:'hand-row'});
+  lesson.hand.forEach(function(c){ handRow.appendChild(cardEl(c,{disabled:true})); });
+  panel.appendChild(handRow);
+
+  if (inter.phase==='decision'){
+    if (inter.categoryId==='card'){
+      var tableTxt = lesson.trickCards.map(function(tc){ return SEAT_NAMES[tc.seat].split(' ')[0]+': '+cardStr(tc.card); }).join(' · ');
+      panel.appendChild(el('p',{style:'font-size:13px;margin-top:8px;'},[
+        txt('Cartas en la mesa: '+tableTxt+'. ¿Qué juegas?')
+      ]));
+      var valid = getValidMoves(lesson.hand, lesson.trickCards, lesson.trump);
+      var cardRow = el('div',{class:'hand-row'});
+      lesson.hand.forEach(function(c){
+        var playable = valid.indexOf(c)>-1;
+        cardRow.appendChild(cardEl(c,{disabled:!playable, onClick: playable?function(){ evaluateInteractiveCard(c); }:null}));
+      });
+      panel.appendChild(cardRow);
+    } else {
+      var levelWrap = el('div',{class:'contract-picker'});
+      [1,2,3,4,5,6,7].forEach(function(lv){
+        var p = el('button',{class:'pill'+(inter.pendingLevel===lv?' selected':'')},[txt(String(lv))]);
+        p.addEventListener('click', function(){ inter.pendingLevel=lv; render(); });
+        levelWrap.appendChild(p);
+      });
+      panel.appendChild(el('label',{class:'fieldlabel'},[txt('Nivel')]));
+      panel.appendChild(levelWrap);
+      var suitWrap = el('div',{class:'contract-picker'});
+      SUITS.concat(['NT']).forEach(function(su){
+        var p = el('button',{class:'pill'+(inter.pendingSuit===su?' selected':'')},[txt(su)]);
+        p.addEventListener('click', function(){ inter.pendingSuit=su; render(); });
+        suitWrap.appendChild(p);
+      });
+      panel.appendChild(el('label',{class:'fieldlabel'},[txt('Palo / SA')]));
+      panel.appendChild(suitWrap);
+      var btnRow2 = el('div',{class:'btn-row',style:'margin-top:12px;'});
+      var canConfirm = inter.pendingLevel && inter.pendingSuit;
+      var bidBtn = el('button',{class:'btn btn-primary'},[txt('📣 Pujar'+(canConfirm?' '+inter.pendingLevel+inter.pendingSuit:''))]);
+      if (!canConfirm) bidBtn.disabled = true;
+      if (canConfirm) bidBtn.addEventListener('click', function(){ evaluateInteractiveBid({level:inter.pendingLevel, suit:inter.pendingSuit}); });
+      btnRow2.appendChild(bidBtn);
+      var passBtn2 = el('button',{class:'btn btn-secondary'},[txt('🚫 Pasar')]);
+      passBtn2.addEventListener('click', function(){ evaluateInteractiveBid('PASS'); });
+      btnRow2.appendChild(passBtn2);
+      panel.appendChild(btnRow2);
+    }
+  } else {
+    var resultColor = inter.correct ? 'var(--green)' : 'var(--red)';
+    panel.appendChild(el('p',{style:'font-size:16px;font-weight:700;color:'+resultColor+';margin-top:10px;'},[
+      txt(inter.correct ? '✅ Correcto según la regla básica' : '❌ La regla básica sugeriría otra cosa')
+    ]));
+    var expectedLabel = inter.categoryId==='card' ? cardStr(inter.expected) : bidToStr(inter.expected);
+    if (!inter.correct){
+      panel.appendChild(el('p',{style:'font-size:13px;color:var(--gold);'},[txt('Sugerencia: '+expectedLabel+'.')]));
+    }
+    var btnRow3 = el('div',{class:'btn-row',style:'margin-top:14px;'});
+    var backBtn = el('button',{class:'btn btn-secondary'},[txt('Volver a lecciones')]);
+    backBtn.addEventListener('click', function(){ state.interactive=null; render(); });
+    btnRow3.appendChild(backBtn);
+    var retryBtn = el('button',{class:'btn btn-secondary'},[txt('🔁 Repetir esta mano')]);
+    retryBtn.addEventListener('click', function(){ startInteractiveLesson(inter.categoryId, inter.lessonIndex); });
+    btnRow3.appendChild(retryBtn);
+    var list = INTERACTIVE_LESSONS[inter.categoryId];
+    if (list.length>1){
+      var nextBtn = el('button',{class:'btn btn-primary'},[txt('Siguiente mano →')]);
+      nextBtn.addEventListener('click', function(){ startInteractiveLesson(inter.categoryId, (inter.lessonIndex+1)%list.length); });
+      btnRow3.appendChild(nextBtn);
+    }
+    panel.appendChild(btnRow3);
+  }
+  app.appendChild(panel);
+}
+
 function renderGame(app){
   var g = state.game;
   if (!g || g.phase==='setup'){
@@ -629,7 +1330,9 @@ function renderGame(app){
       {id:'strong', label:'💪 Fuerte 15-17 eq.'},
       {id:'long', label:'📏 Palo largo 6+'},
       {id:'slam', label:'💎 Slam 20+ PH'},
-      {id:'weak', label:'🪶 Débil 0-7 PH'}
+      {id:'weak', label:'🪶 Débil 0-7 PH'},
+      {id:'4441', label:'📐 4-4-4-1'},
+      {id:'twosuiter', label:'🔀 Dos palos largos'}
     ];
     var modeWrap = el('div',{class:'contract-picker'});
     modes.forEach(function(m){
@@ -642,6 +1345,36 @@ function renderGame(app){
     var btn = el('button',{class:'btn btn-primary',style:'margin-top:14px;'},[txt('🎲 Repartir mano')]);
     btn.addEventListener('click', function(){ dealNewGame(); });
     panel.appendChild(btn);
+
+    var importToggleBtn = el('button',{class:'btn btn-secondary',style:'margin-top:8px;margin-left:8px;'},[txt('📋 Importar mano')]);
+    importToggleBtn.addEventListener('click', function(){ state.showImport = !state.showImport; render(); });
+    panel.appendChild(importToggleBtn);
+
+    if (state.showImport){
+      var importBox = el('div',{style:'background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:12px;margin-top:12px;'});
+      importBox.appendChild(el('p',{style:'font-size:11px;color:var(--muted);margin:0 0 8px 0;'},[
+        txt('Una línea por asiento (N/E/S/W), 4 grupos de palos ♠ ♥ ♦ ♣ separados por espacio. Usa "-" para un palo vacío. Puedes dar las 4 manos completas, o solo la de Sur (el resto se reparte al azar):')
+      ]));
+      importBox.appendChild(el('pre',{style:'font-size:10px;background:var(--panel);padding:8px;border-radius:8px;color:var(--muted);margin:0 0 10px 0;white-space:pre-wrap;'},[
+        txt('N: AKQJ 1098 76 5432\nE: 1092 KQJ2 J98 T87\nS: 65 A543 AKQ2 KQ4\nW: 743 76 1054 J9653')
+      ]));
+      var ta = el('textarea',{style:'width:100%;height:90px;background:var(--panel);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:monospace;font-size:12px;padding:8px;resize:vertical;box-sizing:border-box;'});
+      importBox.appendChild(ta);
+      var importBtn = el('button',{class:'btn btn-primary',style:'margin-top:8px;'},[txt('✅ Validar e importar')]);
+      importBtn.addEventListener('click', function(){
+        var result = parseCustomDeal(ta.value);
+        if (result.error){ showToast('Error al importar: '+result.error); return; }
+        dealNewGame({
+          hands: result.hands,
+          seedId: genSeedId(),
+          vulnerable: Math.random()<0.5,
+          dealer: SEATS[Math.floor(Math.random()*4)]
+        });
+      });
+      importBox.appendChild(importBtn);
+      panel.appendChild(importBox);
+    }
+
     app.appendChild(panel);
     return;
   }
@@ -667,7 +1400,8 @@ function dealNewGame(repeatSeed){
   g.initialHands = deepClone(hands);
   g.seedId = seedId;
   g.hcp = calcHCP(hands.S);
-  g.suggestion = suggestOpeningBid(hands.S);
+  g.conventionsOn = conventionsEnabled();
+  g.suggestion = suggestOpeningBid(hands.S, g.conventionsOn);
   g.dealer = dealer;
   g.vulnerable = vulnerable;
   g.turn = g.dealer;
@@ -675,6 +1409,7 @@ function dealNewGame(repeatSeed){
   state.game = g;
   state.rankingSeed = null;
   state.showFullAnalysis = false;
+  state.showTricksLog = false;
   render();
   setTimeout(auctionStepIfAI, 350);
 }
@@ -692,8 +1427,51 @@ function auctionStepIfAI(){
   var bid = aiDecideBid(g.turn, g.hands[g.turn]);
   submitBid(g.turn, bid);
 }
+function handleStaymanTracking(g, seat, bid){
+  if (!g.conventionsOn){ g.staymanActive = null; return; }
+  if (g.staymanActive && g.staymanActive.stage==='asked' && g.staymanActive.opener===seat){
+    g.staymanActive.stage = 'answered';
+    return;
+  }
+  if (g.staymanActive && g.staymanActive.stage==='answered' && g.staymanActive.asker===seat){
+    g.staymanActive = null; // secuencia completa, la pregunta y su remate ya se han hecho
+    return;
+  }
+  if (bid!=='PASS' && bid.level===2 && bid.suit==='♣'){
+    var lastNonPass = null;
+    for (var i=g.auctionHistory.length-1;i>=0;i--){
+      if (g.auctionHistory[i].bid!=='PASS'){ lastNonPass = g.auctionHistory[i]; break; }
+    }
+    if (lastNonPass && lastNonPass.seat===partnerOf(seat) && lastNonPass.bid!=='PASS' &&
+        lastNonPass.bid.level===1 && lastNonPass.bid.suit==='NT'){
+      g.staymanActive = {asker:seat, opener:partnerOf(seat), stage:'asked'};
+    }
+  }
+}
+function handleBlackwoodTracking(g, seat, bid){
+  if (!g.conventionsOn){ g.blackwoodActive = null; return; }
+  if (g.blackwoodActive && g.blackwoodActive.stage==='asked' && g.blackwoodActive.opener===seat){
+    g.blackwoodActive.stage = 'answered';
+    return;
+  }
+  if (g.blackwoodActive && g.blackwoodActive.stage==='answered' && g.blackwoodActive.asker===seat){
+    g.blackwoodActive = null; // secuencia completa
+    return;
+  }
+  if (bid!=='PASS' && bid.level===4 && bid.suit==='NT'){
+    var lastNonPassBw = null;
+    for (var j=g.auctionHistory.length-1;j>=0;j--){
+      if (g.auctionHistory[j].bid!=='PASS'){ lastNonPassBw = g.auctionHistory[j]; break; }
+    }
+    if (lastNonPassBw && lastNonPassBw.seat===partnerOf(seat) && lastNonPassBw.bid!=='PASS' && lastNonPassBw.bid.suit!=='NT'){
+      g.blackwoodActive = {asker:seat, opener:partnerOf(seat), agreedSuit:lastNonPassBw.bid.suit, stage:'asked'};
+    }
+  }
+}
 function submitBid(seat, bid){
   var g = state.game;
+  handleStaymanTracking(g, seat, bid);
+  handleBlackwoodTracking(g, seat, bid);
   g.auctionHistory.push({seat:seat, bid:bid});
   var passCount = 0;
   for (var i=g.auctionHistory.length-1;i>=0;i--){
@@ -738,7 +1516,11 @@ function concludeAuction(){
 function renderBiddingPanel(app){
   var g = state.game;
   var panel = el('div',{class:'card-panel'});
-  panel.appendChild(el('h3',{},[txt('Tu mano (Sur) · '+g.hcp+' PH'+(g.vulnerable?' · Vulnerable':' · No vulnerable'))]));
+  var titleRow = el('div',{style:'display:flex;justify-content:space-between;align-items:center;'},[
+    el('h3',{style:'margin:0;'},[txt('Tu mano (Sur) · '+g.hcp+' PH'+(g.vulnerable?' · Vulnerable':' · No vulnerable'))])
+  ]);
+  if (g.conventionsOn){ titleRow.appendChild(el('span',{class:'convention-badge'},[txt('Convenciones activas')])); }
+  panel.appendChild(titleRow);
   var handRow = el('div',{class:'hand-row'});
   g.hands.S.forEach(function(c){ handRow.appendChild(cardEl(c,{disabled:true})); });
   panel.appendChild(handRow);
@@ -807,10 +1589,34 @@ function renderBiddingPanel(app){
 function applyCoachBidFeedback(g, userBid){
   if (!coachEnabled()) return;
   var recommended = aiDecideBid('S', g.hands.S);
+  var correct = bidsEqual(userBid, recommended);
+
+  // Clasifica la decisión para el sistema de lecciones (antes de que submitBid añada esta puja al historial)
+  var isOpening = g.auctionHistory.length === 0;
+  var highestEntry = null;
+  for (var i=g.auctionHistory.length-1;i>=0;i--){
+    if (g.auctionHistory[i].bid!=='PASS'){ highestEntry = g.auctionHistory[i]; break; }
+  }
+  var isResponse = !isOpening && highestEntry && highestEntry.seat===partnerOf('S') &&
+    !g.auctionHistory.some(function(e){ return e.bid!=='PASS' && e.seat==='S'; });
+
   g.coachStats.total++;
-  if (bidsEqual(userBid, recommended)){ g.coachStats.matches++; return; }
+  if (correct) g.coachStats.matches++;
+  if (isOpening){ g.coachStats.opening.t++; if (correct) g.coachStats.opening.c++; }
+  else if (isResponse){ g.coachStats.response.t++; if (correct) g.coachStats.response.c++; }
+
+  var lottNote = null;
+  if (lottEnabled()){
+    var lott = suggestLottLevel(g, g.hands.S, 'S');
+    if (lott){
+      lottNote = 'Guía LOTT (aprox. 65-75% de acierto, no ve las manos rivales): con '+lott.fit+' triunfos combinados estimados en '+lott.suit+', muchos jugadores competirían hasta '+lott.level+lott.suit+'.';
+    }
+  }
+  if (correct && !lottNote) return;
   var hcp = g.hcp;
-  showToast('Lola (coach): con '+hcp+' PH, la regla básica sugeriría '+bidToStr(recommended)+' en vez de '+bidToStr(userBid)+'.');
+  var msg = correct ? '' : ('Lola (coach): con '+hcp+' PH, la regla básica sugeriría '+bidToStr(recommended)+' en vez de '+bidToStr(userBid)+'.');
+  if (lottNote) msg += (msg ? ' · ' : '') + lottNote;
+  showToast(msg);
 }
 
 /* ============ PLAYING ============ */
@@ -820,13 +1626,15 @@ function playCard(seat, card){
   var hand = g.hands[seat];
   var idx = hand.indexOf(card);
   if (idx===-1) return;
+  g.redoStack = [];
 
   var coachMsg = null;
   if (coachEnabled() && g.userControlledSeats.indexOf(seat)>-1){
-    var recommended = aiChooseCard(hand, g.trickCards, g.trump);
+    var recommended = aiChooseCard(hand, g.trickCards, g.trump, {g:g, seat:seat});
     g.coachStats.total++;
-    if (recommended === card){ g.coachStats.matches++; }
-    else { coachMsg = coachCardReason(g.trickCards.length, recommended); }
+    g.coachStats.card.t++;
+    if (recommended === card){ g.coachStats.matches++; g.coachStats.card.c++; }
+    else { coachMsg = coachCardReason(g.trickCards.length, recommended, g); }
   }
 
   g.history.push(deepClone({hands:g.hands, trickCards:g.trickCards, tricks:g.tricks, tricksWon:g.tricksWon, turn:g.turn, leader:g.leader, coachStats:g.coachStats}));
@@ -869,12 +1677,14 @@ function aiTurnIfNeeded(){
   if (g.userControlledSeats.indexOf(g.turn)>-1) return;
   var hand = g.hands[g.turn];
   if (!hand.length) return;
-  var choice = aiChooseCard(hand, g.trickCards, g.trump);
+  var choice = aiChooseCard(hand, g.trickCards, g.trump, {g:g, seat:g.turn});
   playCard(g.turn, choice);
 }
 function undoLastPlay(){
   var g = state.game;
   if (!g || !g.history.length){ showToast('No hay nada que deshacer'); return; }
+  var current = deepClone({hands:g.hands, trickCards:g.trickCards, tricks:g.tricks, tricksWon:g.tricksWon, turn:g.turn, leader:g.leader, coachStats:g.coachStats});
+  g.redoStack.push(current);
   var prev = g.history.pop();
   g.hands = prev.hands; g.trickCards = prev.trickCards; g.tricks = prev.tricks;
   g.tricksWon = prev.tricksWon; g.turn = prev.turn; g.leader = prev.leader;
@@ -882,6 +1692,20 @@ function undoLastPlay(){
   g.phase = 'playing';
   render();
   showToast('Jugada deshecha');
+  setTimeout(aiTurnIfNeeded, 400);
+}
+function redoLastPlay(){
+  var g = state.game;
+  if (!g || !g.redoStack.length){ showToast('No hay nada que rehacer'); return; }
+  var current = deepClone({hands:g.hands, trickCards:g.trickCards, tricks:g.tricks, tricksWon:g.tricksWon, turn:g.turn, leader:g.leader, coachStats:g.coachStats});
+  g.history.push(current);
+  var next = g.redoStack.pop();
+  g.hands = next.hands; g.trickCards = next.trickCards; g.tricks = next.tricks;
+  g.tricksWon = next.tricksWon; g.turn = next.turn; g.leader = next.leader;
+  if (next.coachStats) g.coachStats = next.coachStats;
+  g.phase = 'playing';
+  render();
+  showToast('Jugada rehecha');
   setTimeout(aiTurnIfNeeded, 400);
 }
 function finishGame(){
@@ -892,6 +1716,9 @@ function finishGame(){
   var made = declarerTricks >= needed;
   var rawScore = computeScore(g.level, g.trump, declarerTricks, g.vulnerable);
   var nsScore = g.declarerSide==='NS' ? rawScore : -rawScore;
+  var honors = computeHonorsBonus(g.initialHands, g.trump);
+  if (honors.side==='NS') nsScore += honors.bonus;
+  else if (honors.side==='EW') nsScore -= honors.bonus;
   var userWon = nsScore>0;
   if (userWon) playWinSound(); else if (nsScore<0) playLoseSound();
   addGame({
@@ -905,6 +1732,9 @@ function finishGame(){
     vulnerable: g.vulnerable,
     dealer: g.dealer,
     seedId: g.seedId,
+    honorsSide: honors.side,
+    honorsBonus: honors.bonus,
+    honorsDetail: honors.detail,
     score: rawScore,
     nsScore: nsScore,
     userWon: userWon,
@@ -915,7 +1745,11 @@ function finishGame(){
     auction: g.auctionHistory,
     coachMatches: g.coachStats.matches,
     coachTotal: g.coachStats.total,
-    handInsights: buildHandInsights(g)
+    coachOpeningCorrect: g.coachStats.opening.c,
+    coachResponseCorrect: g.coachStats.response.c,
+    coachCardCorrect: g.coachStats.card.c,
+    handInsights: buildHandInsights(g),
+    conventionsOn: g.conventionsOn
   });
   setTimeout(function(){
     var msg;
@@ -936,6 +1770,9 @@ function finishGame(){
     }
     if (coachEnabled() && g.coachStats.total>0){
       msg += ' · Coach: '+g.coachStats.matches+'/'+g.coachStats.total+' decisiones según la regla básica.';
+    }
+    if (honors.side){
+      msg += ' · Honores: '+honors.detail+' (+'+honors.bonus+' para '+(honors.side==='NS'?'vosotros':'los rivales')+').';
     }
     showToast(msg);
   }, 500);
@@ -1013,7 +1850,7 @@ function renderTable(app){
   if (g.phase==='playing' && !g.trickComplete && g.userControlledSeats.indexOf(g.turn)>-1){
     var hintBtn = el('button',{class:'btn btn-secondary'},[txt('💡 Pista')]);
     hintBtn.addEventListener('click', function(){
-      var suggestion = aiChooseCard(g.hands[g.turn], g.trickCards, g.trump);
+      var suggestion = aiChooseCard(g.hands[g.turn], g.trickCards, g.trump, {g:g, seat:g.turn});
       showToast(coachCardReason(g.trickCards.length, suggestion, g));
     });
     btnRow.appendChild(hintBtn);
@@ -1022,10 +1859,31 @@ function renderTable(app){
   if (!g.history.length) undoBtn.disabled = true;
   undoBtn.addEventListener('click', undoLastPlay);
   btnRow.appendChild(undoBtn);
+  var redoBtn = el('button',{class:'btn btn-secondary'},[txt('↪️ Rehacer')]);
+  if (!g.redoStack.length) redoBtn.disabled = true;
+  redoBtn.addEventListener('click', redoLastPlay);
+  btnRow.appendChild(redoBtn);
+  if (g.tricks.length>0){
+    var logBtn = el('button',{class:'btn btn-secondary'},[txt('👁 Bazas jugadas')]);
+    logBtn.addEventListener('click', function(){ state.showTricksLog = !state.showTricksLog; render(); });
+    btnRow.appendChild(logBtn);
+  }
   var newHandBtn = el('button',{class:'btn btn-secondary'},[txt('🎲 Nueva mano')]);
   newHandBtn.addEventListener('click', function(){ dealNewGame(); });
   btnRow.appendChild(newHandBtn);
   app.appendChild(btnRow);
+
+  if (state.showTricksLog && g.tricks.length){
+    var logPanel = el('div',{class:'card-panel'});
+    logPanel.appendChild(el('h3',{},[txt('👁 Bazas jugadas ('+g.tricks.length+')')]));
+    g.tricks.forEach(function(t, i){
+      var line = t.cards.map(function(pc){ return pc.seat+':'+pc.card.rank+pc.card.suit; }).join(' ');
+      logPanel.appendChild(el('div',{style:'font-size:12px;padding:4px 0;border-bottom:1px solid var(--border);'},[
+        txt((i+1)+'. '+line+' → gana '+t.winner)
+      ]));
+    });
+    app.appendChild(logPanel);
+  }
 
   if (g.phase==='finished'){
     var made = declarerTricks>=needed;
@@ -1085,22 +1943,40 @@ function renderHandRanking(seedId){
     panel.appendChild(el('p',{style:'font-size:13px;color:var(--muted);'},[txt('Aún no hay intentos registrados.')]));
     return panel;
   }
+  var newest = games[0];
+  if (newest.dealSnapshot){
+    panel.appendChild(renderHandDiagram(newest.dealSnapshot, {}));
+  }
   var sorted = games.slice().sort(function(a,b){ return b.nsScore - a.nsScore; });
+  var table = el('table',{class:'results-table'});
+  var thead = el('thead',{},[el('tr',{},[
+    el('th',{},[txt('#')]),
+    el('th',{},[txt('Contrato')]),
+    el('th',{},[txt('Declara')]),
+    el('th',{},[txt('Resultado')]),
+    el('th',{},[txt('Bazas')]),
+    el('th',{style:'text-align:right;'},[txt('Puntos')])
+  ])]);
+  table.appendChild(thead);
+  var tbody = el('tbody');
   sorted.forEach(function(g, i){
     var needed = g.tricksBid;
     var diff = g.tricksWon - needed;
-    var diffLabel = g.result==='MAKE'
-      ? (diff>0 ? ('+'+diff+' de pasada') : 'justo')
-      : ('caído '+Math.abs(diff));
-    var row = el('div',{style:'display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:12.5px;'},[
-      el('span',{},[
-        el('b',{},[txt('#'+(i+1)+' ')]),
-        txt(g.contract+' ('+SEAT_NAMES[g.declarer].split(' ')[0]+') · '+g.tricksWon+'/'+needed+' · '+diffLabel+(g.vulnerable?' · vul':''))
-      ]),
-      el('span',{style:'color:'+(g.nsScore>=0?'var(--green)':'var(--red)')+';font-weight:700;'},[txt((g.nsScore>=0?'+':'')+g.nsScore)])
+    var resultLabel = g.result==='MAKE'
+      ? (diff>0 ? ('+'+diff) : '=')
+      : ('-'+Math.abs(diff));
+    var tr = el('tr',{class:i===0?'best':''},[
+      el('td',{},[txt(String(i+1))]),
+      el('td',{},[txt(g.contract+(g.vulnerable?' vul':''))]),
+      el('td',{},[txt(SEAT_NAMES[g.declarer].split(' ')[0])]),
+      el('td',{style:'color:'+(g.result==='MAKE'?'var(--green)':'var(--red)')+';font-weight:700;'},[txt(resultLabel)]),
+      el('td',{},[txt(g.tricksWon+'/'+needed)]),
+      el('td',{class:'num',style:'color:'+(g.nsScore>=0?'var(--green)':'var(--red)')+';'},[txt((g.nsScore>=0?'+':'')+g.nsScore)])
     ]);
-    panel.appendChild(row);
+    tbody.appendChild(tr);
   });
+  table.appendChild(tbody);
+  panel.appendChild(table);
   return panel;
 }
 
@@ -1129,7 +2005,50 @@ function renderStats(app){
   row.appendChild(statBox(avgTricks+'/13','Prom. bazas'));
   row.appendChild(statBox((totalPoints>=0?'+':'')+totalPoints,'Puntos totales'));
   summary.appendChild(row);
+
+  var slamsMade = games.filter(function(g){ return g.declarerSide==='NS' && g.result==='MAKE' && g.level>=6; }).length;
+  var defensesWon = games.filter(function(g){ return g.declarerSide==='EW' && g.result==='DOWN'; }).length;
+  var row2 = el('div',{class:'row-stats',style:'margin-top:8px;'});
+  row2.appendChild(statBox(slamsMade,'Slams hechos'));
+  row2.appendChild(statBox(defensesWon,'Defensas ganadas'));
+  row2.appendChild(statBox(profile.streak||0,'Racha actual'));
+  row2.appendChild(statBox(profile.bestStreak||0,'Mejor racha'));
+  summary.appendChild(row2);
   app.appendChild(summary);
+
+  var progressPanel = el('div',{class:'card-panel'});
+  progressPanel.appendChild(el('h3',{},[txt('📈 Progreso')]));
+  var avgScore = Math.round(totalPoints/total);
+  var declarerCount = games.filter(function(g){ return g.declarer==='S'; }).length;
+  var dummyCount = games.filter(function(g){ return g.dummy==='S'; }).length;
+  var defenderCount = games.filter(function(g){ return g.declarerSide==='EW'; }).length;
+  var ntCount = games.filter(function(g){ return g.contract && g.contract.indexOf('NT')>-1; }).length;
+  var progRow = el('div',{class:'row-stats'});
+  progRow.appendChild(statBox((avgScore>=0?'+':'')+avgScore,'Puntos / mano'));
+  progRow.appendChild(statBox(Math.round(declarerCount/total*100)+'%','Declaras tú'));
+  progRow.appendChild(statBox(Math.round(defenderCount/total*100)+'%','Defiendes'));
+  progRow.appendChild(statBox(Math.round(ntCount/total*100)+'%','Contratos SA'));
+  progressPanel.appendChild(progRow);
+  progressPanel.appendChild(el('p',{style:'font-size:11px;color:var(--muted);margin-top:8px;'},[
+    txt('El resto de manos ('+Math.round(dummyCount/total*100)+'%) las juega tu compañero como declarante y tú eres el muerto.')
+  ]));
+
+  var withCoach = games.filter(function(g){ return g.coachTotal>0; });
+  if (withCoach.length>=4){
+    var last10 = withCoach.slice(0,10);
+    var prev10 = withCoach.slice(10,20);
+    var last10Rate = Math.round(last10.reduce(function(a,g){return a+g.coachMatches;},0) / last10.reduce(function(a,g){return a+g.coachTotal;},0) * 100);
+    var trendLine;
+    if (prev10.length>=3){
+      var prev10Rate = Math.round(prev10.reduce(function(a,g){return a+g.coachMatches;},0) / prev10.reduce(function(a,g){return a+g.coachTotal;},0) * 100);
+      var delta = last10Rate - prev10Rate;
+      trendLine = 'Acierto del coach: '+last10Rate+'% en tus últimas '+last10.length+' manos (antes: '+prev10Rate+'%, '+(delta>=0?'+':'')+delta+' puntos).';
+    } else {
+      trendLine = 'Acierto del coach en tus últimas '+last10.length+' manos: '+last10Rate+'%.';
+    }
+    progressPanel.appendChild(el('p',{style:'font-size:12px;color:var(--muted);margin-top:6px;'},[txt(trendLine)]));
+  }
+  app.appendChild(progressPanel);
 
   var chartPanel = el('div',{class:'card-panel'});
   chartPanel.appendChild(el('h3',{},[txt('Últimas 10 manos (bazas del declarante)')]));
@@ -1149,7 +2068,6 @@ function renderStats(app){
     achGrid.appendChild(box);
   });
   achPanel.appendChild(achGrid);
-  if (profile.streak>0) achPanel.appendChild(el('p',{style:'margin-top:8px;font-size:12px;color:var(--muted);'},[txt('Racha actual: '+profile.streak+' · Mejor racha: '+(profile.bestStreak||0))]));
   app.appendChild(achPanel);
 
   var recentPanel = el('div',{class:'card-panel'});
@@ -1181,18 +2099,12 @@ function renderGameDetail(g){
   var auctionStr = (g.auction||[]).map(function(e){
     return e.seat+' '+(e.bid==='PASS' ? 'Pasa' : (e.bid.level+e.bid.suit));
   }).join(' · ');
-  box.appendChild(el('div',{style:'margin-bottom:6px;color:var(--muted);'},[txt('Subasta: '+(auctionStr||'—'))]));
+  box.appendChild(el('div',{style:'margin-bottom:6px;color:var(--muted);'},[txt('Subasta: '+(auctionStr||'—')+(g.conventionsOn?' · convenciones activas':''))]));
   if (g.handInsights){
     box.appendChild(el('div',{style:'margin-bottom:6px;'},[txt('📐 Plan de la mano: '+g.handInsights)]));
   }
   if (g.dealSnapshot){
-    SEATS.forEach(function(seat){
-      var cards = g.dealSnapshot[seat] || [];
-      box.appendChild(el('div',{style:'margin:3px 0;'},[
-        el('b',{},[txt(SEAT_NAMES[seat]+': ')]),
-        txt(cards.map(function(c){return c.rank+c.suit;}).join(' '))
-      ]));
-    });
+    box.appendChild(renderHandDiagram(g.dealSnapshot, {declarer:g.declarer, dummy:g.dummy, contract:g.contract}));
   }
   if (g.tricksLog && g.tricksLog.length){
     box.appendChild(el('div',{style:'margin-top:8px;color:var(--muted);'},[txt('Bazas:')]));
@@ -1250,6 +2162,26 @@ function renderSettings(app){
   panel.appendChild(el('p',{style:'font-size:11px;color:var(--muted);margin-top:6px;'},[
     txt('Compara tus pujas y jugadas con reglas básicas fijas (PH, segunda mano baja, tercera mano alta...). No sustituye a un profesor real y a veces se equivocará.')
   ]));
+
+  var convRow = el('div',{style:'display:flex;justify-content:space-between;align-items:center;margin-top:14px;'});
+  convRow.appendChild(el('span',{style:'color:#c9c9e6;font-size:14px;'},[txt('🃏 Convenciones (Stayman, débiles)')]));
+  var convToggle = el('div',{class:'toggle'+((p.settings.conventions===true)?' on':'')},[el('div',{class:'dot'})]);
+  convToggle.addEventListener('click', function(){ p.settings.conventions = (p.settings.conventions!==true); saveProfile(p); render(); });
+  convRow.appendChild(convToggle);
+  panel.appendChild(convRow);
+  panel.appendChild(el('p',{style:'font-size:11px;color:var(--muted);margin-top:6px;'},[
+    txt('Activa aperturas débiles de 2 (6-10 PH, palo de 6+) y Stayman tras 1SA (pregunta por palo mayor con 8+ PH). El motor y el coach las usan en cuanto repartas la siguiente mano.')
+  ]));
+
+  var lottRow = el('div',{style:'display:flex;justify-content:space-between;align-items:center;margin-top:14px;'});
+  lottRow.appendChild(el('span',{style:'color:#c9c9e6;font-size:14px;'},[txt('📏 Guía LOTT (nivel del ajuste)')]));
+  var lottToggle = el('div',{class:'toggle'+((p.settings.lott===true)?' on':'')},[el('div',{class:'dot'})]);
+  lottToggle.addEventListener('click', function(){ p.settings.lott = (p.settings.lott!==true); saveProfile(p); render(); });
+  lottRow.appendChild(lottToggle);
+  panel.appendChild(lottRow);
+  panel.appendChild(el('p',{style:'font-size:11px;color:var(--muted);margin-top:6px;'},[
+    txt('Solo añade una nota informativa del coach en subastas competitivas (nunca cambia cómo pujan la IA ni el motor). Precisión aproximada 65-75% según simulaciones publicadas — Lola no ve las manos de los rivales, así que la longitud del compañero es una estimación, no un dato real.')
+  ]));
   app.appendChild(panel);
 
   var learnPanel = el('div',{class:'card-panel'});
@@ -1261,7 +2193,9 @@ function renderSettings(app){
     'Apoyo al compañero: con 4+ cartas de su palo, sube de nivel según tus PH.',
     'Segunda mano, juega baja. Tercera mano, juega alta. Cuarta mano, gana lo más barato posible.',
     'El muerto se coloca boca arriba tras la salida; lo juega el declarante.',
-    'Vulnerable = primas y multas más altas si haces o fallas el contrato.'
+    'Vulnerable = primas y multas más altas si haces o fallas el contrato.',
+    'Con convenciones activas: apertura débil de 2 = 6-10 PH y palo de 6+ (no en ♣). Stayman = 2♣ tras 1SA con 8+ PH y un palo mayor de 4, preguntando si el compañero también lo tiene.',
+    'Blackwood: 4SA pregunta ases (5♣=0 o 4, 5♦=1, 5♥=2, 5♠=3). En Lola se lanza como respuesta directa a la apertura del compañero con gran ajuste y muchos puntos, no tras varias rondas de subasta como en el bridge real.'
   ];
   var learnList = el('ul',{style:'margin:0;padding-left:18px;font-size:12.5px;color:var(--text);line-height:1.7;'});
   learnLines.forEach(function(l){ learnList.appendChild(el('li',{},[txt(l)])); });
