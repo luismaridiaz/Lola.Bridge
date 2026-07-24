@@ -6,9 +6,9 @@
 <meta name="theme-color" content="#0f0f1a">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Lola">
+<meta name="apple-mobile-web-app-title" content="Lola v4">
 <meta name="mobile-web-app-capable" content="yes">
-<title>Lola · Bridge Mentor</title>
+<title>Lola v4 · Bridge Mentor</title>
 <link id="manifestLink" rel="manifest" href="">
 <link id="touchIcon" rel="apple-touch-icon" href="">
 <style>
@@ -61,25 +61,29 @@
 
   .hand-row{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;min-height:70px;}
   .pcard{
-    width:44px;height:62px;background:#fdfdfd;border-radius:9px;position:relative;
+    width:48px;height:68px;background:#fdfdfd;border-radius:9px;position:relative;
     display:flex;flex-direction:column;align-items:center;justify-content:center;
-    box-shadow:0 3px 8px rgba(0,0,0,.35);font-weight:800;font-size:13px;border:none;
+    box-shadow:0 3px 8px rgba(0,0,0,.35);font-weight:800;font-size:15px;border:none;
   }
-  .pcard.red{color:#d1274a;} .pcard.black{color:#1a1a2e;}
-  .pcard .sfx{font-size:19px;line-height:1;margin-top:1px;}
+  .pcard.red{color:#e0102e;} .pcard.black{color:#1a1a2e;}
+  .pcard .sfx{font-size:23px;line-height:1;margin-top:1px;}
   .pcard.disabled{opacity:.35;}
   .suit-label{font-size:10px;color:var(--muted);margin:8px 0 2px 2px;}
 
   .table-wrap{background:radial-gradient(ellipse at center,#1c3d2c,#0f2318);border-radius:20px;padding:16px;border:1px solid #2a4a37;}
-  .compass{display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:auto auto auto;gap:6px;align-items:center;justify-items:center;margin-bottom:10px;}
+  .compass{display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:auto auto auto;gap:8px;align-items:center;justify-items:center;margin-bottom:10px;}
+  .compass .n, .compass .w, .compass .e, .compass .s{display:flex;flex-direction:column;align-items:center;gap:4px;}
   .compass .n{grid-column:2;grid-row:1;} .compass .w{grid-column:1;grid-row:2;}
-  .compass .mid{grid-column:2;grid-row:2;} .compass .e{grid-column:3;grid-row:2;} .compass .s{grid-column:2;grid-row:3;}
-  .seat-label{font-size:10px;color:#8fd6a8;font-weight:700;}
-  .trick-slot{width:34px;height:48px;border-radius:6px;background:rgba(255,255,255,.06);border:1px dashed rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:11px;color:#8fd6a8;}
-  .trick-slot.filled{background:#fdfdfd;border:none;color:#1a1a2e;font-weight:800;}
-  .trick-slot.filled.red{color:#d1274a;}
+  .compass .mid{grid-column:2;grid-row:2;font-size:11px;color:#8fd6a8;font-weight:700;background:rgba(255,255,255,.05);border-radius:999px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;}
+  .compass .e{grid-column:3;grid-row:2;} .compass .s{grid-column:2;grid-row:3;}
+  .seat-label{font-size:13px;color:#8fd6a8;font-weight:700;}
+  .trick-slot{width:42px;height:56px;border-radius:6px;background:rgba(255,255,255,.06);border:1px dashed rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:13px;color:#8fd6a8;}
+  .trick-slot.filled{background:#fdfdfd;border:none;color:#1a1a2e;font-weight:800;font-size:17px;}
+  .trick-slot.filled.red{color:#e0102e;}
+  .trick-slot.hidden-count{font-size:12px;color:var(--muted);border-style:solid;background:rgba(255,255,255,.03);}
 
   .badge{display:inline-block;background:var(--panel2);border-radius:999px;padding:3px 10px;font-size:11px;color:var(--muted);}
+  .auction-badge{display:inline-block;background:var(--panel2);border:1px solid var(--border);border-radius:999px;padding:6px 14px;font-size:16px;font-weight:800;color:var(--text);}
   .convention-badge{display:inline-block;background:var(--gold);color:#1a1a2e;border-radius:999px;padding:3px 10px;font-size:10px;font-weight:700;}
   .contract-picker{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
   .pill{padding:8px 12px;border-radius:12px;border:1px solid var(--border);background:var(--panel2);font-size:13px;color:var(--muted);}
@@ -115,7 +119,7 @@
   .diagram-hand .seat-tag{font-size:10px;font-weight:800;color:var(--gold);margin-bottom:3px;letter-spacing:.4px;}
   .diagram-hand .seat-tag.plain{color:var(--muted);}
   .diagram-hand .suitline{white-space:nowrap;font-variant-numeric:tabular-nums;}
-  .diagram-hand .suitline.red{color:#d1274a;}
+  .diagram-hand .suitline.red{color:#e0102e;}
   .diagram-hand .suitline.black{color:var(--text);}
   body.theme-light .diagram-hand.dummy{background:rgba(0,0,0,.03);}
 
@@ -134,7 +138,7 @@
   }
   body.theme-light .table-wrap{background:radial-gradient(ellipse at center,#dff3e6,#c9ead9);border:1px solid #b7dcc6;}
   body.theme-light .trick-slot{background:rgba(0,0,0,.05);border:1px dashed rgba(0,0,0,.15);color:#2f7a4d;}
-  body.theme-light .trick-slot.filled{background:#ffffff;color:#1a1a2e;}
+  body.theme-light .trick-slot.filled{background:#ffffff;}
   body.theme-light .detail-box{color:#33334d;}
   body.theme-light .seat-label{color:#2f7a4d;}
   body.theme-light .pcard.disabled{opacity:.45;}
@@ -155,8 +159,8 @@ var RANKS = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
 var SEATS = ['N','E','S','W'];
 var SEAT_NAMES = {N:'Norte', E:'Este', S:'Sur (tú)', W:'Oeste'};
 
-var LS_PROFILE = 'lola_bridge_profile';
-var LS_GAMES = 'lola_bridge_games';
+var LS_PROFILE = 'lolav4_bridge_profile';
+var LS_GAMES = 'lolav4_bridge_games';
 
 /* ============ DECK / HAND UTILS ============ */
 function createDeck(){
@@ -289,6 +293,8 @@ function aiRespondToWeakTwo(hand, partnerBid){
 function aiRespondToBid(hand, partnerBid, conv){
   var hcp = calcHCP(hand);
   if (conv && partnerBid.level===1 && partnerBid.suit==='NT'){
+    if (suitCount(hand,'♥')>=5) return {level:2, suit:'♦'}; // transfer a ♥
+    if (suitCount(hand,'♠')>=5) return {level:2, suit:'♥'}; // transfer a ♠
     var majors4 = ['♠','♥'].filter(function(s){ return suitCount(hand,s)>=4; });
     if (hcp>=8 && majors4.length>0) return {level:2, suit:'♣'}; // Stayman: pregunta por palo mayor
   }
@@ -345,6 +351,15 @@ function blackwoodComplete(hand, openerAnswer, agreedSuit){
   return {level:5, suit:agreedSuit};
 }
 function bidRank(bid){ return bid.level*5 + STRAIN_ORDER.indexOf(bid.suit); }
+// Doblar/Redoblar no son pujas de contrato (no tienen level/suit); hay que excluirlos
+// de cualquier búsqueda de "la puja vigente", o comparaciones como bidRank() explotarían.
+function isContractBid(bid){ return bid!=='PASS' && bid!=='DOUBLE' && bid!=='REDOUBLE'; }
+function bidLabel(bid){
+  if (bid==='PASS') return 'Pasa';
+  if (bid==='DOUBLE') return 'X';
+  if (bid==='REDOUBLE') return 'XX';
+  return bid.level+bid.suit;
+}
 function aiDecideBid(seat, hand){
   var g = state.game;
   var conv = !!g.conventionsOn;
@@ -368,14 +383,25 @@ function aiDecideBid(seat, hand){
     }
   }
 
+  if (!candidate && conv && g.transferActive){
+    if (g.transferActive.stage==='asked' && g.transferActive.opener===seat){
+      candidate = {level:2, suit:g.transferActive.target}; // aceptación forzosa, siempre se acepta
+    } else if (g.transferActive.stage==='accepted' && g.transferActive.asker===seat){
+      var transferHcp = calcHCP(hand);
+      if (transferHcp>=8) candidate = {level:4, suit:g.transferActive.target};
+      // con menos de 8 PH, candidate se queda sin asignar: cae al bloque normal de abajo,
+      // que no encuentra nada que hacer (ya has pujado) y termina en PASS, correctamente.
+    }
+  }
+
   if (!candidate){
     var highestEntry = null;
     for (var i=g.auctionHistory.length-1;i>=0;i--){
-      if (g.auctionHistory[i].bid !== 'PASS'){ highestEntry = g.auctionHistory[i]; break; }
+      if (isContractBid(g.auctionHistory[i].bid)){ highestEntry = g.auctionHistory[i]; break; }
     }
     var partner = partnerOf(seat);
     var ownBidExists = g.auctionHistory.some(function(e){
-      return e.bid !== 'PASS' && e.seat === seat;
+      return isContractBid(e.bid) && e.seat === seat;
     });
     if (!ownBidExists && highestEntry && highestEntry.seat === partner){
       candidate = aiRespondToBid(hand, highestEntry.bid, conv);
@@ -390,7 +416,7 @@ function aiDecideBid(seat, hand){
   candidate.level = Math.min(candidate.level, 7);
   var highestEntry2 = null;
   for (var j=g.auctionHistory.length-1;j>=0;j--){
-    if (g.auctionHistory[j].bid !== 'PASS'){ highestEntry2 = g.auctionHistory[j]; break; }
+    if (isContractBid(g.auctionHistory[j].bid)){ highestEntry2 = g.auctionHistory[j]; break; }
   }
   var rank = highestEntry2 ? bidRank(highestEntry2.bid) : -1;
   while (bidRank(candidate) <= rank && candidate.level < 7){ candidate.level++; }
@@ -401,18 +427,30 @@ function aiDecideBid(seat, hand){
 /* ============ SCORING ============ */
 function isMajor(suit){ return suit==='♥' || suit==='♠'; }
 function trickValue(suit){ if (suit==='NT') return 30; return isMajor(suit) ? 30 : 20; }
-function computeScore(level, suit, tricksWon, vulnerable){
+function computeScore(level, suit, tricksWon, vulnerable, doubled){
   var needed = level+6;
   var made = tricksWon>=needed;
+  var mult = doubled==='XX' ? 4 : (doubled==='X' ? 2 : 1);
   if (!made){
     var down = needed - tricksWon;
-    var per = vulnerable ? 100 : 50;
-    return -1 * down * per;
+    if (!doubled){
+      var per = vulnerable ? 100 : 50;
+      return -1 * down * per;
+    }
+    // Multas dobladas/redobladas: no vulnerable 100/200/200..., vulnerable 200/300/300...
+    var penalty = 0;
+    for (var i=1;i<=down;i++){
+      var step = (i===1) ? (vulnerable?200:100) : (vulnerable?300:200);
+      penalty += step;
+    }
+    return -1 * penalty * (doubled==='XX' ? 2 : 1);
   }
-  var base = level*trickValue(suit) + (suit==='NT' ? 10 : 0);
+  var base = (level*trickValue(suit) + (suit==='NT' ? 10 : 0)) * mult;
   var overtricks = tricksWon - needed;
-  var total = base + overtricks*trickValue(suit);
+  var overValue = doubled ? (vulnerable?200:100)*(doubled==='XX'?2:1) : trickValue(suit);
+  var total = base + overtricks*overValue;
   total += (base>=100) ? (vulnerable?500:300) : 50;
+  if (doubled) total += (doubled==='XX'?100:50); // prima de "insulto"
   if (level===6) total += vulnerable?750:500;
   if (level===7) total += vulnerable?1500:1000;
   return total;
@@ -437,6 +475,58 @@ function computeHonorsBonus(hands, trump){
     }
   });
   return best;
+}
+
+/* ============ SOLVER DE FINAL DE MANO (double-dummy REAL, acotado) ============ */
+// Minimax exacto con memoización: explora TODAS las líneas de juego posibles desde el
+// punto actual y devuelve las bazas exactas que se llevará el bando declarante con juego
+// óptimo de las dos partes — no es una heurística, es un cálculo completo. Por eso mismo
+// solo es viable con pocas cartas por mano (si no, el árbol de posibilidades crece
+// demasiado para resolverlo sin las optimizaciones de un solver real tipo DDS).
+var ENDGAME_SOLVER_MAX_CARDS = 5; // cartas por mano — más lento (hasta ~2.7s en el peor caso probado)
+function canSolveEndgame(hands){
+  return SEATS.every(function(s){ return hands[s].length <= ENDGAME_SOLVER_MAX_CARDS; });
+}
+function solveEndgame(hands, trump, declarerSide, turn, trickCardsStart){
+  var memo = {};
+  function stateKey(hs, t, tc){
+    return SEATS.map(function(s){ return s+':'+hs[s].map(cardStr).slice().sort().join(','); }).join('|')
+      + '|turn:'+t+'|trick:'+tc.map(function(x){ return x.seat+cardStr(x.card); }).join(',');
+  }
+  function solve(hs, t, tc){
+    var totalLeft = SEATS.reduce(function(a,s){ return a+hs[s].length; }, 0);
+    if (totalLeft===0 && tc.length===0) return 0;
+    var key = stateKey(hs, t, tc);
+    if (memo[key]!==undefined) return memo[key];
+    var hand = hs[t];
+    var valid = getValidMoves(hand, tc, trump);
+    var isDeclaringSide = partnershipOf(t)===declarerSide;
+    var best = null;
+    for (var i=0;i<valid.length;i++){
+      var card = valid[i];
+      var newHands = {};
+      SEATS.forEach(function(s){ newHands[s] = hs[s].slice(); });
+      newHands[t].splice(newHands[t].indexOf(card), 1);
+      var newTrick = tc.concat([{seat:t, card:card}]);
+      var added = 0, nextTurn, nextTrick;
+      if (newTrick.length===4){
+        var winner = trickWinner(newTrick, trump).seat;
+        added = partnershipOf(winner)===declarerSide ? 1 : 0;
+        nextTurn = winner;
+        nextTrick = [];
+      } else {
+        nextTurn = nextSeatCW(t);
+        nextTrick = newTrick;
+      }
+      var total = added + solve(newHands, nextTurn, nextTrick);
+      if (best===null) best = total;
+      else if (isDeclaringSide){ if (total>best) best = total; }
+      else { if (total<best) best = total; }
+    }
+    memo[key] = best;
+    return best;
+  }
+  return solve(hands, turn, (trickCardsStart||[]).slice());
 }
 
 /* ============ AI CARD PLAY ============ */
@@ -588,7 +678,7 @@ function getProfile(){
     var p = JSON.parse(localStorage.getItem(LS_PROFILE));
     if (p) return p;
   }catch(e){}
-  var def = {name:'Jugador', elo:1200, streak:0, bestStreak:0, createdAt:new Date().toISOString(), settings:{sound:true, theme:'dark', coach:true, conventions:false}};
+  var def = {name:'Jugador', elo:1200, streak:0, bestStreak:0, createdAt:new Date().toISOString(), settings:{sound:true, theme:'dark', coach:true, conventions:false, toastDuration:'medium', controlPartnerHand:false}};
   localStorage.setItem(LS_PROFILE, JSON.stringify(def));
   return def;
 }
@@ -602,17 +692,38 @@ function lottEnabled(){ var s=getSettings(); return s.lott===true; }
 // Precisión aproximada 65-75% según simulaciones publicadas (Vernes / Cohen); nuestra IA
 // no ve las manos de los rivales, así que la longitud del compañero es una estimación,
 // no un dato real. Por eso va desactivada por defecto y con este aviso siempre visible.
+// Legalidad de doblar/redoblar: doblar solo a una puja de contrato del rival que no esté
+// ya doblada; redoblar solo si tu propio bando tiene el contrato y el rival lo ha doblado.
+function getDoubleState(g, seat){
+  var highestEntry = null, idx = -1;
+  for (var i=g.auctionHistory.length-1;i>=0;i--){
+    if (isContractBid(g.auctionHistory[i].bid)){ highestEntry = g.auctionHistory[i]; idx = i; break; }
+  }
+  if (!highestEntry) return {canDouble:false, canRedouble:false};
+  var doubled = null;
+  for (var j=idx+1;j<g.auctionHistory.length;j++){
+    if (g.auctionHistory[j].bid==='DOUBLE') doubled='X';
+    if (g.auctionHistory[j].bid==='REDOUBLE') doubled='XX';
+  }
+  var contractSide = partnershipOf(highestEntry.seat);
+  var mySide = partnershipOf(seat);
+  return {
+    canDouble: !doubled && contractSide!==mySide,
+    canRedouble: doubled==='X' && contractSide===mySide,
+    doubled: doubled
+  };
+}
 function suggestLottLevel(g, hand, seat){
   var partner = partnerOf(seat);
   var ownSuit = null, oppHasBid = false;
   g.auctionHistory.forEach(function(e){
-    if (e.bid==='PASS' || e.bid.suit==='NT') return;
+    if (!isContractBid(e.bid) || e.bid.suit==='NT') return;
     if (partnershipOf(e.seat)===partnershipOf(seat)){ if (!ownSuit) ownSuit = e.bid.suit; }
     else oppHasBid = true;
   });
   if (!ownSuit || !oppHasBid) return null;
   var partnerOpenedIt = g.auctionHistory.some(function(e){
-    return e.seat===partner && e.bid!=='PASS' && e.bid.suit===ownSuit && e.bid.level===1;
+    return e.seat===partner && isContractBid(e.bid) && e.bid.suit===ownSuit && e.bid.level===1;
   });
   var estimatedPartnerLength = partnerOpenedIt ? 5 : 4;
   var fit = suitCount(hand, ownSuit) + estimatedPartnerLength;
@@ -625,7 +736,40 @@ function bidsEqual(a,b){
   if (a==='PASS' || b==='PASS') return false;
   return a.level===b.level && a.suit===b.suit;
 }
-function coachCardReason(position, recommended, g){
+function buildConcreteReason(position, recommended, userCard, g, trick){
+  if (!userCard || userCard===recommended) return null;
+  if (position===0){
+    if (userCard.suit !== recommended.suit){
+      return 'saliste de '+userCard.suit+' en vez de '+recommended.suit+', que era el palo recomendado (tu más largo, o el que animó tu compañero)';
+    }
+    if (userCard.value > recommended.value){
+      return 'saliste con una carta más alta de la necesaria en ese palo; al abrir un palo largo conviene guardar los honores y salir bajo';
+    }
+  } else if (position===1){
+    var led = trick[0] ? trick[0].card : null;
+    if (led && userCard.suit===led.suit && userCard.value>recommended.value){
+      return 'jugaste alto en segunda posición sin necesidad; "segunda mano baja" evita regalar bazas mientras aún quedan dos jugadores por hablar';
+    }
+    if (led && userCard.suit!==led.suit && recommended.suit===led.suit){
+      return 'no seguiste el palo de salida pudiendo hacerlo; seguir palo cuando puedes suele ser la jugada más segura';
+    }
+  } else if (position===2){
+    if (userCard.value < recommended.value){
+      return 'jugaste más bajo que la sugerida en tercera posición; ahí conviene intentar ganar la baza jugando alto, no guardarte la carta para después';
+    }
+  } else {
+    var willWinUser = trick.length ? (trickWinner(trick.concat([{seat:'x',card:userCard}]), g.trump).card === userCard) : false;
+    var willWinRec = trick.length ? (trickWinner(trick.concat([{seat:'x',card:recommended}]), g.trump).card === recommended) : false;
+    if (willWinRec && !willWinUser){
+      return 'la carta sugerida ganaba la baza y la tuya no; en última posición, si puedes ganar, suele merecer la pena';
+    }
+    if (willWinUser && willWinRec && userCard.value > recommended.value){
+      return 'las dos ganaban la baza, pero gastaste una carta más alta de la necesaria; en última posición gana con la más barata posible';
+    }
+  }
+  return null;
+}
+function coachCardReason(position, recommended, g, userCard){
   var trick = (g && g.trickCards) ? g.trickCards : [];
   var base;
   if (position===0){
@@ -654,7 +798,9 @@ function coachCardReason(position, recommended, g){
       ? ('esta carta gana la baza (supera lo que hay en la mesa: '+tableCards+')')
       : ('no puedes ganar esta baza con lo que hay en la mesa ('+tableCards+'); mejor descartar tu carta más floja que desperdiciar algo útil');
   }
-  var msg = 'Lola (coach): '+base+'. Sugerida: '+cardStr(recommended)+'.';
+  var msg = 'Lola v4 (coach): '+base+'. Sugerida: '+cardStr(recommended)+'.';
+  var reason = buildConcreteReason(position, recommended, userCard, g, trick);
+  if (reason) msg += ' Motivo: '+reason+'.';
   if (!g || !g.declarer) return msg;
 
   // Nota de progreso (solo con datos públicos: bazas hechas, contrato, bazas que quedan
@@ -893,6 +1039,7 @@ var INTERACTIVE_LESSONS = {
   opening: [
     {
       title: 'Apertura equilibrada',
+      difficulty: 'Principiante',
       hand: [
         {suit:'♠',rank:'A',value:14},{suit:'♠',rank:'Q',value:12},{suit:'♠',rank:'5',value:5},{suit:'♠',rank:'2',value:2},
         {suit:'♥',rank:'K',value:13},{suit:'♥',rank:'J',value:11},{suit:'♥',rank:'8',value:8},
@@ -902,17 +1049,30 @@ var INTERACTIVE_LESSONS = {
     },
     {
       title: 'Apertura de palo largo',
+      difficulty: 'Principiante',
       hand: [
         {suit:'♠',rank:'A',value:14},{suit:'♠',rank:'Q',value:12},{suit:'♠',rank:'J',value:11},{suit:'♠',rank:'9',value:9},{suit:'♠',rank:'7',value:7},{suit:'♠',rank:'4',value:4},
         {suit:'♥',rank:'K',value:13},{suit:'♥',rank:'5',value:5},
         {suit:'♦',rank:'8',value:8},{suit:'♦',rank:'3',value:3},
         {suit:'♣',rank:'A',value:14},{suit:'♣',rank:'6',value:6},{suit:'♣',rank:'4',value:4}
       ]
+    },
+    {
+      title: 'Apertura débil de 2',
+      difficulty: 'Intermedio',
+      conventions: true,
+      hand: [
+        {suit:'♥',rank:'K',value:13},{suit:'♥',rank:'Q',value:12},{suit:'♥',rank:'9',value:9},{suit:'♥',rank:'7',value:7},{suit:'♥',rank:'6',value:6},{suit:'♥',rank:'4',value:4},
+        {suit:'♠',rank:'8',value:8},{suit:'♠',rank:'3',value:3},
+        {suit:'♦',rank:'7',value:7},{suit:'♦',rank:'5',value:5},{suit:'♦',rank:'2',value:2},
+        {suit:'♣',rank:'J',value:11},{suit:'♣',rank:'2',value:2}
+      ]
     }
   ],
   response: [
     {
       title: 'Apoyo al compañero',
+      difficulty: 'Principiante',
       partnerBid: {level:1, suit:'♥'},
       hand: [
         {suit:'♠',rank:'8',value:8},{suit:'♠',rank:'3',value:3},{suit:'♠',rank:'2',value:2},
@@ -923,6 +1083,7 @@ var INTERACTIVE_LESSONS = {
     },
     {
       title: 'Apoyo con puntos de distribución',
+      difficulty: 'Intermedio',
       partnerBid: {level:1, suit:'♠'},
       hand: [
         {suit:'♠',rank:'K',value:13},{suit:'♠',rank:'Q',value:12},{suit:'♠',rank:'8',value:8},{suit:'♠',rank:'3',value:3},
@@ -930,11 +1091,24 @@ var INTERACTIVE_LESSONS = {
         {suit:'♦',rank:'7',value:7},{suit:'♦',rank:'4',value:4},
         {suit:'♣',rank:'J',value:11},{suit:'♣',rank:'9',value:9},{suit:'♣',rank:'6',value:6},{suit:'♣',rank:'5',value:5},{suit:'♣',rank:'4',value:4},{suit:'♣',rank:'2',value:2}
       ]
+    },
+    {
+      title: 'Pregunta Stayman',
+      difficulty: 'Intermedio',
+      conventions: true,
+      partnerBid: {level:1, suit:'NT'},
+      hand: [
+        {suit:'♠',rank:'K',value:13},{suit:'♠',rank:'9',value:9},{suit:'♠',rank:'7',value:7},{suit:'♠',rank:'4',value:4},
+        {suit:'♥',rank:'6',value:6},{suit:'♥',rank:'3',value:3},
+        {suit:'♦',rank:'A',value:14},{suit:'♦',rank:'8',value:8},{suit:'♦',rank:'5',value:5},
+        {suit:'♣',rank:'J',value:11},{suit:'♣',rank:'7',value:7},{suit:'♣',rank:'6',value:6},{suit:'♣',rank:'2',value:2}
+      ]
     }
   ],
   card: [
     {
       title: 'Segunda mano baja',
+      difficulty: 'Principiante',
       trickCards: [{seat:'W', card:{suit:'♦',rank:'5',value:5}}],
       trump: '♥',
       hand: [
@@ -946,6 +1120,7 @@ var INTERACTIVE_LESSONS = {
     },
     {
       title: 'Tercera mano alta',
+      difficulty: 'Principiante',
       trickCards: [{seat:'W', card:{suit:'♠',rank:'2',value:2}}, {seat:'N', card:{suit:'♠',rank:'9',value:9}}],
       trump: '♥',
       hand: [
@@ -953,6 +1128,17 @@ var INTERACTIVE_LESSONS = {
         {suit:'♥',rank:'A',value:14},{suit:'♥',rank:'9',value:9},{suit:'♥',rank:'4',value:4},
         {suit:'♦',rank:'Q',value:12},{suit:'♦',rank:'J',value:11},{suit:'♦',rank:'4',value:4},
         {suit:'♣',rank:'7',value:7},{suit:'♣',rank:'5',value:5},{suit:'♣',rank:'3',value:3},{suit:'♣',rank:'2',value:2}
+      ]
+    },
+    {
+      title: '¿Fallar o descartar?',
+      difficulty: 'Intermedio',
+      trickCards: [{seat:'W', card:{suit:'♦',rank:'K',value:13}}, {seat:'N', card:{suit:'♦',rank:'2',value:2}}],
+      trump: '♥',
+      hand: [
+        {suit:'♠',rank:'K',value:13},{suit:'♠',rank:'Q',value:12},{suit:'♠',rank:'4',value:4},
+        {suit:'♣',rank:'J',value:11},{suit:'♣',rank:'8',value:8},{suit:'♣',rank:'5',value:5},{suit:'♣',rank:'4',value:4},{suit:'♣',rank:'2',value:2},
+        {suit:'♥',rank:'A',value:14},{suit:'♥',rank:'7',value:7},{suit:'♥',rank:'6',value:6},{suit:'♥',rank:'3',value:3},{suit:'♥',rank:'2',value:2}
       ]
     }
   ]
@@ -967,9 +1153,10 @@ function startInteractiveLesson(categoryId, idx){
 function evaluateInteractiveBid(userBid){
   var inter = state.interactive;
   if (!inter || inter.phase!=='decision') return;
+  var conv = !!inter.lesson.conventions;
   var expected = (inter.categoryId==='opening')
-    ? suggestOpeningBidObj(inter.lesson.hand, false)
-    : aiRespondToBid(inter.lesson.hand, inter.lesson.partnerBid, false);
+    ? suggestOpeningBidObj(inter.lesson.hand, conv)
+    : aiRespondToBid(inter.lesson.hand, inter.lesson.partnerBid, conv);
   var expectedBid = expected || 'PASS';
   inter.userAnswer = userBid;
   inter.expected = expectedBid;
@@ -999,7 +1186,7 @@ function newEmptyGame(){
     turn:null, leader:null,
     trickCards:[], tricks:[], tricksWon:{N:0,E:0,S:0,W:0}, history:[], redoStack:[], trickComplete:false,
     coachStats:{matches:0, total:0, opening:{c:0,t:0}, response:{c:0,t:0}, card:{c:0,t:0}},
-    conventionsOn:false, staymanActive:null, blackwoodActive:null,
+    conventionsOn:false, staymanActive:null, blackwoodActive:null, transferActive:null, doubled:null,
     phase:'setup', suggestion:null, hcp:null
   };
 }
@@ -1094,13 +1281,18 @@ function cardEl(card, opts){
   else { b.disabled = true; }
   return b;
 }
+function getToastDuration(){
+  var s = getSettings();
+  var map = {short:2500, medium:4500, long:7000};
+  return map[s.toastDuration] || map.medium;
+}
 function showToast(msg){
   var host = document.getElementById('toastHost');
   host.innerHTML = '';
   var t = el('div',{class:'toast'},[txt(msg)]);
   host.appendChild(t);
   if (state.toastTimer) clearTimeout(state.toastTimer);
-  state.toastTimer = setTimeout(function(){ host.innerHTML=''; }, 3800);
+  state.toastTimer = setTimeout(function(){ host.innerHTML=''; }, getToastDuration());
 }
 function statBox(v,l){
   return el('div',{class:'stat-box'},[el('div',{class:'v'},[txt(String(v))]), el('div',{class:'l'},[txt(l)])]);
@@ -1151,7 +1343,7 @@ function render(){
     el('div',{class:'brand'},[
       el('div',{class:'logo'},[txt('♠')]),
       el('div',{},[
-        el('h1',{},[txt('Lola')]),
+        el('h1',{},[txt('Lola v4')]),
         el('p',{},[txt('Bridge mentor · 100% offline')])
       ])
     ]),
@@ -1176,7 +1368,7 @@ function render(){
   if (state.tab==='stats') renderStats(app);
   if (state.tab==='settings') renderSettings(app);
 
-  app.appendChild(el('footer',{class:'note'},[txt('Lola v2.0 · sin conexión · tus datos se guardan solo en este dispositivo')]));
+  app.appendChild(el('footer',{class:'note'},[txt('Lola v4 · sin conexión · tus datos se guardan solo en este dispositivo')]));
 }
 
 /* ============ RENDER: GAME TAB ============ */
@@ -1186,6 +1378,7 @@ function renderTutorial(app){
     renderInteractiveLesson(app);
     return;
   }
+  renderLibraryIndex(app);
   var games = getGames();
   var status = getTutorialStatus(games);
   var intro = el('div',{class:'card-panel'});
@@ -1238,12 +1431,90 @@ function renderTutorial(app){
     txt('El progreso de las lecciones se calcula a partir de todas tus manos jugadas — nunca se pierde ni hay que reiniciarlo por separado. La mano guiada es solo un ejemplo suelto, no cuenta para el progreso.')
   ]);
   app.appendChild(tip);
+
+  renderAdvancedTechniques(app);
+}
+var ADVANCED_TECHNIQUES = [
+  {
+    title: 'Squeeze simple',
+    icon: '🎩',
+    summary: 'Un rival tiene que guardar dos palos a la vez con muy pocas cartas; cuando se queda sin escapatoria, una de tus cartas se hace ganadora sola.',
+    pattern: [
+      'Triunfo: ♥. Ya has sacado todos los triunfos menos el último, que tiene el muerto.',
+      'Tu mano: guardas la Dama de ♠ (perdedora mientras el Rey de ♠ siga vivo en la mano rival).',
+      'El muerto: guarda la Dama de ♣ (perdedora mientras el Rey de ♣ siga vivo en la mano rival).',
+      'Oeste ya se ha quedado sin cartas de ♠ y de ♣ (están "aisladas" en Este).',
+      'Este llega a esta baza con solo el Rey de ♠, el Rey de ♣, y nada más seguro que descartar.'
+    ],
+    explanation: 'El muerto saca el último triunfo. Este tiene que descartar: si tira el Rey de ♠, tu Dama de ♠ se hace ganadora; si tira el Rey de ♣, la Dama de ♣ del muerto se hace ganadora. Haga lo que haga, ganas una baza que antes no tenías — eso es un squeeze.'
+  },
+  {
+    title: 'Endplay (mano forzada)',
+    icon: '🪤',
+    summary: 'Obligas a un rival a ganar una baza en un momento en el que solo tiene jugadas malas: o te regala una baza en otro palo, o te deja fallar y descartar a la vez.',
+    pattern: [
+      'Triunfo: ♠. Tú y el muerto tenéis As-Dama de ♥ (necesitarías adivinar dónde está el Rey si tuvieras que jugar ese palo tú).',
+      'Oeste tiene el Rey de ♥ solo (sin más cartas de ese palo) y ninguna salida segura en el resto de palos.',
+      'Le cedes a Oeste una baza en otro palo (el "throw-in") justo cuando no le queda nada bueno que jugar.'
+    ],
+    explanation: 'Oeste gana esa baza, pero no tiene ninguna jugada segura: si tiene que salir de ♥, sale hacia tu As-Dama y ganas la baza sin necesidad de adivinar nada; si no tiene ♥ y tiene que jugar otro palo donde ya no le quedan cartas, te da baza y descarte gratis (fallo y descarte). Le has "endosado" la baza en el peor momento posible para él.'
+  }
+];
+function renderAdvancedTechniques(app){
+  var panel = el('div',{class:'card-panel'});
+  panel.appendChild(el('h3',{},[txt('🎓 Técnicas avanzadas (patrón ilustrativo)')]));
+  panel.appendChild(el('p',{style:'font-size:12px;color:var(--muted);'},[
+    txt('Esto NO son manos de un torneo ni de un libro concreto — son esqueletos de palos inventados para mostrar la idea, no un reparto de 52 cartas. Tampoco hay coach aquí validando tu jugada: estas técnicas dependen del orden exacto y de las entradas de toda la mano, algo que nuestro motor de reglas básicas no analiza de forma fiable.')
+  ]));
+  app.appendChild(panel);
+
+  ADVANCED_TECHNIQUES.forEach(function(tech, idx){
+    var tpanel = el('div',{class:'card-panel'});
+    tpanel.appendChild(el('h3',{},[txt(tech.icon+' '+tech.title)]));
+    tpanel.appendChild(el('p',{style:'font-size:13px;color:var(--muted);margin:6px 0;'},[txt(tech.summary)]));
+    var patternList = el('ul',{style:'margin:8px 0;padding-left:18px;font-size:12.5px;line-height:1.6;'});
+    tech.pattern.forEach(function(l){ patternList.appendChild(el('li',{},[txt(l)])); });
+    tpanel.appendChild(patternList);
+    var revealBtn = el('button',{class:'btn btn-secondary'},[txt(state['techReveal'+idx] ? '🙈 Ocultar explicación' : '💡 Ver qué pasa')]);
+    revealBtn.addEventListener('click', function(){ state['techReveal'+idx] = !state['techReveal'+idx]; render(); });
+    tpanel.appendChild(revealBtn);
+    if (state['techReveal'+idx]){
+      tpanel.appendChild(el('p',{style:'font-size:13px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);'},[txt(tech.explanation)]));
+    }
+    app.appendChild(tpanel);
+  });
+}
+var LIBRARY_CATEGORY_NAMES = {opening:'Apertura', response:'Respuestas', card:'Juego de la carta'};
+function renderLibraryIndex(app){
+  var panel = el('div',{class:'card-panel'});
+  panel.appendChild(el('h3',{},[txt('📖 Biblioteca de manos')]));
+  panel.appendChild(el('p',{style:'font-size:12px;color:var(--muted);margin-top:-4px;margin-bottom:10px;'},[
+    txt('Manos propias, verificadas con el motor real. No cuentan para el progreso de las lecciones de abajo — son para practicar un caso concreto las veces que quieras.')
+  ]));
+  Object.keys(INTERACTIVE_LESSONS).forEach(function(catId){
+    INTERACTIVE_LESSONS[catId].forEach(function(lesson, idx){
+      var row = el('div',{class:'hist-line'});
+      row.appendChild(el('span',{},[
+        txt(lesson.title+' '),
+        el('span',{style:'color:var(--muted);font-size:11px;'},[txt('· '+LIBRARY_CATEGORY_NAMES[catId]+(lesson.difficulty?' · '+lesson.difficulty:''))])
+      ]));
+      var openBtn = el('button',{class:'btn btn-secondary',style:'padding:6px 12px;font-size:12px;'},[txt('Abrir')]);
+      openBtn.addEventListener('click', function(){ startInteractiveLesson(catId, idx); });
+      row.appendChild(openBtn);
+      panel.appendChild(row);
+    });
+  });
+  app.appendChild(panel);
 }
 function renderInteractiveLesson(app){
   var inter = state.interactive;
   var lesson = inter.lesson;
   var panel = el('div',{class:'card-panel'});
-  panel.appendChild(el('h3',{},[txt('🎯 '+lesson.title)]));
+  var titleRow2 = el('div',{style:'display:flex;justify-content:space-between;align-items:center;'},[
+    el('h3',{style:'margin:0;'},[txt('🎯 '+lesson.title)])
+  ]);
+  if (lesson.difficulty){ titleRow2.appendChild(el('span',{class:'convention-badge'},[txt(lesson.difficulty)])); }
+  panel.appendChild(titleRow2);
   panel.appendChild(el('p',{style:'font-size:13px;color:var(--muted);'},[
     txt('Mano de ejemplo · '+calcHCP(lesson.hand)+' PH'+(inter.categoryId==='response'?' · tu compañero abrió '+bidToStr(lesson.partnerBid):''))
   ]));
@@ -1440,9 +1711,9 @@ function handleStaymanTracking(g, seat, bid){
   if (bid!=='PASS' && bid.level===2 && bid.suit==='♣'){
     var lastNonPass = null;
     for (var i=g.auctionHistory.length-1;i>=0;i--){
-      if (g.auctionHistory[i].bid!=='PASS'){ lastNonPass = g.auctionHistory[i]; break; }
+      if (isContractBid(g.auctionHistory[i].bid)){ lastNonPass = g.auctionHistory[i]; break; }
     }
-    if (lastNonPass && lastNonPass.seat===partnerOf(seat) && lastNonPass.bid!=='PASS' &&
+    if (lastNonPass && lastNonPass.seat===partnerOf(seat) &&
         lastNonPass.bid.level===1 && lastNonPass.bid.suit==='NT'){
       g.staymanActive = {asker:seat, opener:partnerOf(seat), stage:'asked'};
     }
@@ -1461,10 +1732,34 @@ function handleBlackwoodTracking(g, seat, bid){
   if (bid!=='PASS' && bid.level===4 && bid.suit==='NT'){
     var lastNonPassBw = null;
     for (var j=g.auctionHistory.length-1;j>=0;j--){
-      if (g.auctionHistory[j].bid!=='PASS'){ lastNonPassBw = g.auctionHistory[j]; break; }
+      if (isContractBid(g.auctionHistory[j].bid)){ lastNonPassBw = g.auctionHistory[j]; break; }
     }
-    if (lastNonPassBw && lastNonPassBw.seat===partnerOf(seat) && lastNonPassBw.bid!=='PASS' && lastNonPassBw.bid.suit!=='NT'){
+    if (lastNonPassBw && lastNonPassBw.seat===partnerOf(seat) && lastNonPassBw.bid.suit!=='NT'){
       g.blackwoodActive = {asker:seat, opener:partnerOf(seat), agreedSuit:lastNonPassBw.bid.suit, stage:'asked'};
+    }
+  }
+}
+// Transfer Jacoby: 2♦ pide ♥, 2♥ pide ♠, tras 1SA del compañero. El abridor acepta
+// siempre (nivel forzoso, no depende de su mano); quien pregunta remata pasando o
+// subiendo a partida según sus PH.
+function handleTransferTracking(g, seat, bid){
+  if (!g.conventionsOn){ g.transferActive = null; return; }
+  if (g.transferActive && g.transferActive.stage==='asked' && g.transferActive.opener===seat){
+    g.transferActive.stage = 'accepted';
+    return;
+  }
+  if (g.transferActive && g.transferActive.stage==='accepted' && g.transferActive.asker===seat){
+    g.transferActive = null; // secuencia completa
+    return;
+  }
+  if (bid!=='PASS' && bid.level===2 && (bid.suit==='♦' || bid.suit==='♥')){
+    var lastNonPassT = null;
+    for (var k=g.auctionHistory.length-1;k>=0;k--){
+      if (isContractBid(g.auctionHistory[k].bid)){ lastNonPassT = g.auctionHistory[k]; break; }
+    }
+    if (lastNonPassT && lastNonPassT.seat===partnerOf(seat) && lastNonPassT.bid.level===1 && lastNonPassT.bid.suit==='NT'){
+      var target = bid.suit==='♦' ? '♥' : '♠';
+      g.transferActive = {asker:seat, opener:partnerOf(seat), target:target, stage:'asked'};
     }
   }
 }
@@ -1472,12 +1767,13 @@ function submitBid(seat, bid){
   var g = state.game;
   handleStaymanTracking(g, seat, bid);
   handleBlackwoodTracking(g, seat, bid);
+  handleTransferTracking(g, seat, bid);
   g.auctionHistory.push({seat:seat, bid:bid});
   var passCount = 0;
   for (var i=g.auctionHistory.length-1;i>=0;i--){
     if (g.auctionHistory[i].bid==='PASS') passCount++; else break;
   }
-  var anyBid = g.auctionHistory.some(function(e){ return e.bid!=='PASS'; });
+  var anyBid = g.auctionHistory.some(function(e){ return isContractBid(e.bid); });
   if (anyBid && passCount>=3){ concludeAuction(); return; }
   if (!anyBid && passCount>=4){
     showToast('Todos pasan. Repartiendo de nuevo…');
@@ -1492,23 +1788,30 @@ function concludeAuction(){
   var g = state.game;
   var highestEntry = null;
   for (var i=g.auctionHistory.length-1;i>=0;i--){
-    if (g.auctionHistory[i].bid!=='PASS'){ highestEntry = g.auctionHistory[i]; break; }
+    if (isContractBid(g.auctionHistory[i].bid)){ highestEntry = g.auctionHistory[i]; break; }
   }
   g.level = highestEntry.bid.level;
   g.trump = highestEntry.bid.suit;
   g.contract = g.level + g.trump;
+  var highestIdx = g.auctionHistory.indexOf(highestEntry);
+  g.doubled = null;
+  for (i=highestIdx+1;i<g.auctionHistory.length;i++){
+    if (g.auctionHistory[i].bid==='DOUBLE') g.doubled='X';
+    if (g.auctionHistory[i].bid==='REDOUBLE') g.doubled='XX';
+  }
   var side = partnershipOf(highestEntry.seat);
   var declarer = highestEntry.seat;
   for (i=0;i<g.auctionHistory.length;i++){
     var e = g.auctionHistory[i];
-    if (e.bid!=='PASS' && e.bid.suit===g.trump && partnershipOf(e.seat)===side){ declarer = e.seat; break; }
+    if (isContractBid(e.bid) && e.bid.suit===g.trump && partnershipOf(e.seat)===side){ declarer = e.seat; break; }
   }
   g.declarer = declarer;
   g.declarerSide = side;
   g.dummy = partnerOf(declarer);
   g.leader = nextSeatCW(declarer);
   g.turn = g.leader;
-  g.userControlledSeats = declarer==='S' ? ['S','N'] : (g.dummy==='S' ? [] : ['S']);
+  var controlPartner = getSettings().controlPartnerHand === true;
+  g.userControlledSeats = declarer==='S' ? ['S','N'] : ((declarer==='N' && controlPartner) ? ['S','N'] : ['S']);
   g.phase = 'playing';
   render();
   setTimeout(aiTurnIfNeeded, 450);
@@ -1525,7 +1828,7 @@ function renderBiddingPanel(app){
   g.hands.S.forEach(function(c){ handRow.appendChild(cardEl(c,{disabled:true})); });
   panel.appendChild(handRow);
   panel.appendChild(el('p',{style:'margin-top:10px;font-size:13px;color:#c9c9e6;'},[
-    txt('Lola sugiere: '), el('b',{style:'color:var(--gold);'},[txt(g.suggestion)])
+    txt('Lola v4 sugiere: '), el('b',{style:'color:var(--gold);'},[txt(g.suggestion)])
   ]));
   app.appendChild(panel);
 
@@ -1533,8 +1836,8 @@ function renderBiddingPanel(app){
   auctionPanel.appendChild(el('h3',{},[txt('Subasta · reparte '+SEAT_NAMES[g.dealer])]));
   var log = el('div',{style:'display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;'});
   g.auctionHistory.forEach(function(e){
-    var label = e.bid==='PASS' ? 'Pasa' : (e.bid.level+e.bid.suit);
-    log.appendChild(el('span',{class:'badge'},[txt(e.seat+': '+label)]));
+    var label = bidLabel(e.bid);
+    log.appendChild(el('span',{class:'auction-badge'},[txt(e.seat+': '+label)]));
   });
   if (!g.auctionHistory.length) log.appendChild(el('span',{class:'badge'},[txt('Nadie ha pujado aún')]));
   auctionPanel.appendChild(log);
@@ -1564,7 +1867,7 @@ function renderBiddingPanel(app){
       var candidate = {level:g.pendingLevel, suit:g.pendingSuit};
       var highestEntry = null;
       for (var i=g.auctionHistory.length-1;i>=0;i--){
-        if (g.auctionHistory[i].bid!=='PASS'){ highestEntry = g.auctionHistory[i]; break; }
+        if (isContractBid(g.auctionHistory[i].bid)){ highestEntry = g.auctionHistory[i]; break; }
       }
       if (highestEntry && bidRank(candidate)<=bidRank(highestEntry.bid)){
         showToast('Esa puja no supera la actual ('+highestEntry.bid.level+highestEntry.bid.suit+')');
@@ -1580,6 +1883,17 @@ function renderBiddingPanel(app){
       submitBid('S','PASS');
     });
     btnRow.appendChild(passBtn);
+    var dbl = getDoubleState(g, 'S');
+    if (dbl.canDouble){
+      var doubleBtn = el('button',{class:'btn btn-danger'},[txt('❌ Doblar')]);
+      doubleBtn.addEventListener('click', function(){ submitBid('S','DOUBLE'); });
+      btnRow.appendChild(doubleBtn);
+    }
+    if (dbl.canRedouble){
+      var redoubleBtn = el('button',{class:'btn btn-danger'},[txt('🔁 Redoblar')]);
+      redoubleBtn.addEventListener('click', function(){ submitBid('S','REDOUBLE'); });
+      btnRow.appendChild(redoubleBtn);
+    }
     auctionPanel.appendChild(btnRow);
   } else {
     auctionPanel.appendChild(el('p',{style:'color:var(--muted);font-size:13px;'},[txt('Turno de '+SEAT_NAMES[g.turn]+'…')]));
@@ -1595,10 +1909,10 @@ function applyCoachBidFeedback(g, userBid){
   var isOpening = g.auctionHistory.length === 0;
   var highestEntry = null;
   for (var i=g.auctionHistory.length-1;i>=0;i--){
-    if (g.auctionHistory[i].bid!=='PASS'){ highestEntry = g.auctionHistory[i]; break; }
+    if (isContractBid(g.auctionHistory[i].bid)){ highestEntry = g.auctionHistory[i]; break; }
   }
   var isResponse = !isOpening && highestEntry && highestEntry.seat===partnerOf('S') &&
-    !g.auctionHistory.some(function(e){ return e.bid!=='PASS' && e.seat==='S'; });
+    !g.auctionHistory.some(function(e){ return isContractBid(e.bid) && e.seat==='S'; });
 
   g.coachStats.total++;
   if (correct) g.coachStats.matches++;
@@ -1614,7 +1928,7 @@ function applyCoachBidFeedback(g, userBid){
   }
   if (correct && !lottNote) return;
   var hcp = g.hcp;
-  var msg = correct ? '' : ('Lola (coach): con '+hcp+' PH, la regla básica sugeriría '+bidToStr(recommended)+' en vez de '+bidToStr(userBid)+'.');
+  var msg = correct ? '' : ('Lola v4 (coach): con '+hcp+' PH, la regla básica sugeriría '+bidToStr(recommended)+' en vez de '+bidToStr(userBid)+'.');
   if (lottNote) msg += (msg ? ' · ' : '') + lottNote;
   showToast(msg);
 }
@@ -1634,7 +1948,7 @@ function playCard(seat, card){
     g.coachStats.total++;
     g.coachStats.card.t++;
     if (recommended === card){ g.coachStats.matches++; g.coachStats.card.c++; }
-    else { coachMsg = coachCardReason(g.trickCards.length, recommended, g); }
+    else { coachMsg = coachCardReason(g.trickCards.length, recommended, g, card); }
   }
 
   g.history.push(deepClone({hands:g.hands, trickCards:g.trickCards, tricks:g.tricks, tricksWon:g.tricksWon, turn:g.turn, leader:g.leader, coachStats:g.coachStats}));
@@ -1714,7 +2028,7 @@ function finishGame(){
   var declarerTricks = g.declarerSide==='NS' ? (g.tricksWon.N+g.tricksWon.S) : (g.tricksWon.E+g.tricksWon.W);
   var needed = g.level + 6;
   var made = declarerTricks >= needed;
-  var rawScore = computeScore(g.level, g.trump, declarerTricks, g.vulnerable);
+  var rawScore = computeScore(g.level, g.trump, declarerTricks, g.vulnerable, g.doubled);
   var nsScore = g.declarerSide==='NS' ? rawScore : -rawScore;
   var honors = computeHonorsBonus(g.initialHands, g.trump);
   if (honors.side==='NS') nsScore += honors.bonus;
@@ -1724,6 +2038,8 @@ function finishGame(){
   addGame({
     date: new Date().toISOString(),
     contract: g.contract,
+    doubled: g.doubled,
+    contractLabel: g.contract + (g.doubled==='XX' ? ' XX' : (g.doubled==='X' ? ' X' : '')),
     declarer: g.declarer,
     declarerSide: g.declarerSide,
     result: made?'MAKE':'DOWN',
@@ -1756,16 +2072,16 @@ function finishGame(){
     if (g.declarerSide==='NS'){
       if (made){
         var over = declarerTricks-needed;
-        msg = over>0 ? ('Lola: ¡Contrato hecho con '+over+' de pasada! ('+(nsScore>=0?'+':'')+nsScore+' puntos)')
-                      : ('Lola: Contrato justo. ('+(nsScore>=0?'+':'')+nsScore+' puntos)');
+        msg = over>0 ? ('Lola v4: ¡Contrato hecho con '+over+' de pasada! ('+(nsScore>=0?'+':'')+nsScore+' puntos)')
+                      : ('Lola v4: Contrato justo. ('+(nsScore>=0?'+':'')+nsScore+' puntos)');
       } else {
-        msg = 'Lola: Caído por '+(needed-declarerTricks)+'. ('+nsScore+' puntos)';
+        msg = 'Lola v4: Caído por '+(needed-declarerTricks)+'. ('+nsScore+' puntos)';
       }
     } else {
       if (made){
-        msg = 'Lola: Los rivales han cumplido su contrato. ('+nsScore+' puntos)';
+        msg = 'Lola v4: Los rivales han cumplido su contrato. ('+nsScore+' puntos)';
       } else {
-        msg = 'Lola: ¡Buena defensa! Habéis hecho caer el contrato rival. (+'+Math.abs(nsScore)+' puntos)';
+        msg = 'Lola v4: ¡Buena defensa! Habéis hecho caer el contrato rival. (+'+Math.abs(nsScore)+' puntos)';
       }
     }
     if (coachEnabled() && g.coachStats.total>0){
@@ -1782,60 +2098,73 @@ function finishGame(){
 function renderTable(app){
   var g = state.game;
   var declarerTricks = g.declarerSide==='NS' ? (g.tricksWon.N+g.tricksWon.S) : (g.tricksWon.E+g.tricksWon.W);
+  var defenderTricks = g.declarerSide==='NS' ? (g.tricksWon.E+g.tricksWon.W) : (g.tricksWon.N+g.tricksWon.S);
   var needed = g.level + 6;
 
   var status = el('div',{class:'card-panel'});
   var row = el('div',{class:'row-stats'});
-  row.appendChild(statBox(g.contract,'Contrato'));
+  row.appendChild(statBox(g.contract+(g.doubled==='XX'?' XX':(g.doubled==='X'?' X':'')),'Contrato'));
   row.appendChild(statBox(declarerTricks+' / '+needed,'Bazas necesarias'));
   row.appendChild(statBox(SEAT_NAMES[g.turn]||'-','Turno'));
   row.appendChild(statBox(g.vulnerable?'Sí':'No','Vulnerable'));
   status.appendChild(row);
+  var row1b = el('div',{class:'row-stats',style:'margin-top:8px;'});
+  row1b.appendChild(statBox(declarerTricks,'Bazas declarante'));
+  row1b.appendChild(statBox(defenderTricks,'Bazas defensa'));
+  status.appendChild(row1b);
   status.appendChild(el('p',{style:'margin-top:8px;font-size:12px;color:var(--muted);'},[
     txt('Declara '+SEAT_NAMES[g.declarer]+' · Muerto: '+SEAT_NAMES[g.dummy])
   ]));
   app.appendChild(status);
 
+  var revealed = g.tricks.length>0 || g.trickCards.length>0;
+
+  var topSeat = null, topLabel = null;
+  if (g.dummy!=='S' && revealed){
+    topSeat = g.dummy;
+    topLabel = 'Muerto ('+SEAT_NAMES[topSeat]+')';
+  } else if (g.dummy==='S' && g.declarer==='N' && g.userControlledSeats.indexOf('N')>-1){
+    topSeat = 'N';
+    topLabel = 'Mano de tu compañero (Norte) · declara';
+  }
+  if (topSeat){
+    var topPanel = el('div',{class:'card-panel'});
+    topPanel.appendChild(el('h3',{},[txt(topLabel)]));
+    var topRow = el('div',{class:'hand-row'});
+    var canPlayTop = g.turn===topSeat && g.phase==='playing' && !g.trickComplete && g.userControlledSeats.indexOf(topSeat)>-1;
+    var validTop = canPlayTop ? getValidMoves(g.hands[topSeat], g.trickCards, g.trump) : [];
+    g.hands[topSeat].forEach(function(c){
+      var playable = canPlayTop && validTop.indexOf(c)>-1;
+      topRow.appendChild(cardEl(c,{disabled:!playable, onClick: playable?function(){playCard(topSeat,c);}:null}));
+    });
+    topPanel.appendChild(topRow);
+    app.appendChild(topPanel);
+  }
+
   var tw = el('div',{class:'table-wrap'});
   var compass = el('div',{class:'compass'});
-  compass.appendChild(el('div',{class:'n'},[el('span',{class:'seat-label'},[txt('N '+g.tricksWon.N)])]));
-  compass.appendChild(el('div',{class:'w'},[el('span',{class:'seat-label'},[txt('O '+g.tricksWon.W)])]));
-  var midCell = el('div',{class:'mid'});
-  var trickRow = el('div',{style:'display:flex;gap:8px;'});
-  SEATS.forEach(function(seat){
+  function seatCellContent(seat){
     var found = g.trickCards.filter(function(tc){return tc.seat===seat;})[0];
     if (found){
-      trickRow.appendChild(el('div',{class:'trick-slot filled'+(isRed(found.card.suit)?' red':'')},[txt(cardStr(found.card))]));
-    } else {
-      trickRow.appendChild(el('div',{class:'trick-slot'},[txt(seat)]));
+      return el('div',{class:'trick-slot filled'+(isRed(found.card.suit)?' red':'')},[txt(cardStr(found.card))]);
     }
-  });
-  midCell.appendChild(trickRow);
-  compass.appendChild(midCell);
-  compass.appendChild(el('div',{class:'e'},[el('span',{class:'seat-label'},[txt('E '+g.tricksWon.E)])]));
-  compass.appendChild(el('div',{class:'s'},[el('span',{class:'seat-label'},[txt('S '+g.tricksWon.S)])]));
+    var seatRevealed = (seat==='S') || (seat===g.dummy && (g.tricks.length>0 || g.trickCards.length>0)) || (seat===topSeat);
+    if (!seatRevealed){
+      var count = g.hands[seat] ? g.hands[seat].length : 0;
+      return el('div',{class:'trick-slot hidden-count'},[txt('🂠 '+count)]);
+    }
+    return el('div',{class:'trick-slot'},[txt(seat)]);
+  }
+  compass.appendChild(el('div',{class:'n'},[el('span',{class:'seat-label'},[txt('N '+g.tricksWon.N)]), seatCellContent('N')]));
+  compass.appendChild(el('div',{class:'w'},[el('span',{class:'seat-label'},[txt('O '+g.tricksWon.W)]), seatCellContent('W')]));
+  compass.appendChild(el('div',{class:'mid'},[txt(g.trump==='NT'?'SA':g.trump)]));
+  compass.appendChild(el('div',{class:'e'},[el('span',{class:'seat-label'},[txt('E '+g.tricksWon.E)]), seatCellContent('E')]));
+  compass.appendChild(el('div',{class:'s'},[el('span',{class:'seat-label'},[txt('S '+g.tricksWon.S)]), seatCellContent('S')]));
   tw.appendChild(compass);
   app.appendChild(tw);
 
-  var revealed = g.tricks.length>0 || g.trickCards.length>0;
-
-  if (g.dummy!=='S' && revealed){
-    var dummySeat = g.dummy;
-    var dummyPanel = el('div',{class:'card-panel'});
-    dummyPanel.appendChild(el('h3',{},[txt('Muerto ('+SEAT_NAMES[dummySeat]+')')]));
-    var dummyRow = el('div',{class:'hand-row'});
-    var canPlayDummy = g.turn===dummySeat && g.phase==='playing' && !g.trickComplete && g.userControlledSeats.indexOf(dummySeat)>-1;
-    var validDummy = canPlayDummy ? getValidMoves(g.hands[dummySeat], g.trickCards, g.trump) : [];
-    g.hands[dummySeat].forEach(function(c){
-      var playable = canPlayDummy && validDummy.indexOf(c)>-1;
-      dummyRow.appendChild(cardEl(c,{disabled:!playable, onClick: playable?function(){playCard(dummySeat,c);}:null}));
-    });
-    dummyPanel.appendChild(dummyRow);
-    app.appendChild(dummyPanel);
-  }
-
   var southPanel = el('div',{class:'card-panel'});
-  southPanel.appendChild(el('h3',{},[txt('Tu mano (Sur)'+(g.dummy==='S'?' · eres el muerto, la juega tu compañero':''))]));
+  southPanel.appendChild(el('h3',{},[txt('Tu mano (Sur)'+(g.dummy==='S'?' · eres el muerto':''))]));
   var southRow = el('div',{class:'hand-row'});
   var canPlaySouth = g.turn==='S' && g.phase==='playing' && !g.trickComplete && g.userControlledSeats.indexOf('S')>-1;
   var validSouth = canPlaySouth ? getValidMoves(g.hands.S, g.trickCards, g.trump) : [];
@@ -1871,16 +2200,42 @@ function renderTable(app){
   var newHandBtn = el('button',{class:'btn btn-secondary'},[txt('🎲 Nueva mano')]);
   newHandBtn.addEventListener('click', function(){ dealNewGame(); });
   btnRow.appendChild(newHandBtn);
+  if (g.phase==='playing'){
+    var resetBtn = el('button',{class:'btn btn-secondary'},[txt('🔄 Reiniciar esta mano')]);
+    resetBtn.addEventListener('click', function(){
+      if (confirm('¿Reiniciar esta mano desde el principio? Perderás el progreso de esta partida (podrás volver a pujarla igual).')){
+        repeatCurrentHand();
+      }
+    });
+    btnRow.appendChild(resetBtn);
+    if (canSolveEndgame(g.hands)){
+      var exactBtn = el('button',{class:'btn btn-secondary'},[txt('🎯 Análisis exacto')]);
+      exactBtn.addEventListener('click', function(){
+        var declarerTricksSoFar = g.declarerSide==='NS' ? (g.tricksWon.N+g.tricksWon.S) : (g.tricksWon.E+g.tricksWon.W);
+        var fromHere = solveEndgame(g.hands, g.trump, g.declarerSide, g.turn, g.trickCards);
+        var remaining = SEATS.reduce(function(a,s){ return a+g.hands[s].length; },0);
+        var totalFinal = declarerTricksSoFar + fromHere;
+        showToast('🎯 Análisis exacto (ve las 4 manos, no es una pista legal en una mesa real): con juego óptimo de ambos bandos desde aquí, el declarante se lleva '+fromHere+' de las '+remaining+' bazas que quedan (total final: '+totalFinal+').');
+      });
+      btnRow.appendChild(exactBtn);
+    }
+  }
   app.appendChild(btnRow);
 
   if (state.showTricksLog && g.tricks.length){
     var logPanel = el('div',{class:'card-panel'});
     logPanel.appendChild(el('h3',{},[txt('👁 Bazas jugadas ('+g.tricks.length+')')]));
     g.tricks.forEach(function(t, i){
-      var line = t.cards.map(function(pc){ return pc.seat+':'+pc.card.rank+pc.card.suit; }).join(' ');
-      logPanel.appendChild(el('div',{style:'font-size:12px;padding:4px 0;border-bottom:1px solid var(--border);'},[
-        txt((i+1)+'. '+line+' → gana '+t.winner)
-      ]));
+      var lineEl = el('div',{style:'font-size:12px;padding:4px 0;border-bottom:1px solid var(--border);'});
+      lineEl.appendChild(txt((i+1)+'. '));
+      t.cards.forEach(function(pc, idx){
+        lineEl.appendChild(el('span',{style:'color:'+(isRed(pc.card.suit)?'#e0102e':'var(--text)')+';font-weight:700;'},[
+          txt(pc.seat+':'+pc.card.rank+pc.card.suit)
+        ]));
+        if (idx<t.cards.length-1) lineEl.appendChild(txt(' '));
+      });
+      lineEl.appendChild(txt(' → gana '+t.winner));
+      logPanel.appendChild(lineEl);
     });
     app.appendChild(logPanel);
   }
@@ -1899,7 +2254,7 @@ function renderTable(app){
       var insights = buildHandInsights(g);
       if (insights){
         res.appendChild(el('p',{style:'font-size:12px;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px solid var(--border);text-align:left;'},[
-          txt('📐 Lola (coach) — plan de la mano: '+insights)
+          txt('📐 Lola v4 (coach) — plan de la mano: '+insights)
         ]));
       }
     }
@@ -1967,7 +2322,7 @@ function renderHandRanking(seedId){
       : ('-'+Math.abs(diff));
     var tr = el('tr',{class:i===0?'best':''},[
       el('td',{},[txt(String(i+1))]),
-      el('td',{},[txt(g.contract+(g.vulnerable?' vul':''))]),
+      el('td',{},[txt((g.contractLabel||g.contract)+(g.vulnerable?' vul':''))]),
       el('td',{},[txt(SEAT_NAMES[g.declarer].split(' ')[0])]),
       el('td',{style:'color:'+(g.result==='MAKE'?'var(--green)':'var(--red)')+';font-weight:700;'},[txt(resultLabel)]),
       el('td',{},[txt(g.tricksWon+'/'+needed)]),
@@ -2075,7 +2430,7 @@ function renderStats(app){
   var list = el('div');
   games.slice(0,10).forEach(function(g, idx){
     var line = el('div',{class:'hist-line'},[
-      el('span',{},[txt(g.contract+' ('+SEAT_NAMES[g.declarer]+') · '+g.tricksWon+'/'+g.tricksBid)]),
+      el('span',{},[txt((g.contractLabel||g.contract)+' ('+SEAT_NAMES[g.declarer]+') · '+g.tricksWon+'/'+g.tricksBid)]),
       el('span',{style:'color:'+(g.userWon?'var(--green)':'var(--red)')+';font-weight:700;'},[txt((g.nsScore>=0?'+':'')+g.nsScore)])
     ]);
     line.addEventListener('click', function(){ state.selectedGame = (state.selectedGame===idx?null:idx); render(); });
@@ -2097,7 +2452,7 @@ function renderStats(app){
 function renderGameDetail(g){
   var box = el('div',{class:'detail-box'});
   var auctionStr = (g.auction||[]).map(function(e){
-    return e.seat+' '+(e.bid==='PASS' ? 'Pasa' : (e.bid.level+e.bid.suit));
+    return e.seat+' '+bidLabel(e.bid);
   }).join(' · ');
   box.appendChild(el('div',{style:'margin-bottom:6px;color:var(--muted);'},[txt('Subasta: '+(auctionStr||'—')+(g.conventionsOn?' · convenciones activas':''))]));
   if (g.handInsights){
@@ -2109,8 +2464,16 @@ function renderGameDetail(g){
   if (g.tricksLog && g.tricksLog.length){
     box.appendChild(el('div',{style:'margin-top:8px;color:var(--muted);'},[txt('Bazas:')]));
     g.tricksLog.forEach(function(t, i){
-      var line = t.cards.map(function(pc){return pc.seat+':'+pc.card.rank+pc.card.suit;}).join(' ');
-      box.appendChild(el('div',{},[txt((i+1)+'. '+line+' → gana '+t.winner)]));
+      var lineEl = el('div',{});
+      lineEl.appendChild(txt((i+1)+'. '));
+      t.cards.forEach(function(pc, idx){
+        lineEl.appendChild(el('span',{style:'color:'+(isRed(pc.card.suit)?'#e0102e':'inherit')+';font-weight:700;'},[
+          txt(pc.seat+':'+pc.card.rank+pc.card.suit)
+        ]));
+        if (idx<t.cards.length-1) lineEl.appendChild(txt(' '));
+      });
+      lineEl.appendChild(txt(' → gana '+t.winner));
+      box.appendChild(lineEl);
     });
   }
   return box;
@@ -2180,7 +2543,27 @@ function renderSettings(app){
   lottRow.appendChild(lottToggle);
   panel.appendChild(lottRow);
   panel.appendChild(el('p',{style:'font-size:11px;color:var(--muted);margin-top:6px;'},[
-    txt('Solo añade una nota informativa del coach en subastas competitivas (nunca cambia cómo pujan la IA ni el motor). Precisión aproximada 65-75% según simulaciones publicadas — Lola no ve las manos de los rivales, así que la longitud del compañero es una estimación, no un dato real.')
+    txt('Solo añade una nota informativa del coach en subastas competitivas (nunca cambia cómo pujan la IA ni el motor). Precisión aproximada 65-75% según simulaciones publicadas — Lola v4 no ve las manos de los rivales, así que la longitud del compañero es una estimación, no un dato real.')
+  ]));
+
+  panel.appendChild(el('label',{class:'fieldlabel',style:'margin-top:14px;'},[txt('⏱️ Duración de los mensajes (pistas, coach, avisos)')]));
+  var durWrap = el('div',{class:'contract-picker'});
+  [{id:'short',label:'Poco'},{id:'medium',label:'Medio'},{id:'long',label:'Largo'}].forEach(function(d){
+    var current = p.settings.toastDuration || 'medium';
+    var pill = el('button',{class:'pill'+(current===d.id?' selected':'')},[txt(d.label)]);
+    pill.addEventListener('click', function(){ p.settings.toastDuration = d.id; saveProfile(p); render(); });
+    durWrap.appendChild(pill);
+  });
+  panel.appendChild(durWrap);
+
+  var partnerRow = el('div',{style:'display:flex;justify-content:space-between;align-items:center;margin-top:14px;'});
+  partnerRow.appendChild(el('span',{style:'color:#c9c9e6;font-size:14px;'},[txt('👀 Jugar también la mano de mi compañero')]));
+  var partnerToggle = el('div',{class:'toggle'+((p.settings.controlPartnerHand===true)?' on':'')},[el('div',{class:'dot'})]);
+  partnerToggle.addEventListener('click', function(){ p.settings.controlPartnerHand = (p.settings.controlPartnerHand!==true); saveProfile(p); render(); });
+  partnerRow.appendChild(partnerToggle);
+  panel.appendChild(partnerRow);
+  panel.appendChild(el('p',{style:'font-size:11px;color:var(--muted);margin-top:6px;'},[
+    txt('Cuando tu compañero (Norte) declare y tú seas el muerto, podrás jugar también su mano en vez de que la juegue la IA. Es más entretenido, pero rompe la regla real de información oculta (el muerto nunca ve la mano del declarante en una mesa de verdad). Se aplica desde la siguiente mano.')
   ]));
   app.appendChild(panel);
 
@@ -2195,7 +2578,8 @@ function renderSettings(app){
     'El muerto se coloca boca arriba tras la salida; lo juega el declarante.',
     'Vulnerable = primas y multas más altas si haces o fallas el contrato.',
     'Con convenciones activas: apertura débil de 2 = 6-10 PH y palo de 6+ (no en ♣). Stayman = 2♣ tras 1SA con 8+ PH y un palo mayor de 4, preguntando si el compañero también lo tiene.',
-    'Blackwood: 4SA pregunta ases (5♣=0 o 4, 5♦=1, 5♥=2, 5♠=3). En Lola se lanza como respuesta directa a la apertura del compañero con gran ajuste y muchos puntos, no tras varias rondas de subasta como en el bridge real.'
+    'Blackwood: 4SA pregunta ases (5♣=0 o 4, 5♦=1, 5♥=2, 5♠=3). En Lola v4 se lanza como respuesta directa a la apertura del compañero con gran ajuste y muchos puntos, no tras varias rondas de subasta como en el bridge real.',
+    'Transfer (Jacoby): tras 1SA del compañero, 2♦ pide que abra a 2♥, y 2♥ pide que abra a 2♠ — el abridor siempre acepta, no depende de su mano. Sirve para que el que tiene el palo largo (5+) sea quien reciba la salida del rival.'
   ];
   var learnList = el('ul',{style:'margin:0;padding-left:18px;font-size:12.5px;color:var(--text);line-height:1.7;'});
   learnLines.forEach(function(l){ learnList.appendChild(el('li',{},[txt(l)])); });
@@ -2231,7 +2615,7 @@ function renderSettings(app){
   app.appendChild(dangerPanel);
 
   app.appendChild(el('div',{class:'card-panel',style:'text-align:center;color:var(--muted);font-size:12px;'},[
-    txt('Lola v2.0 · 100% offline · '+getGames().length+' partidas jugadas · ELO '+p.elo)
+    txt('Lola v4 · 100% offline · '+getGames().length+' partidas jugadas · ELO '+p.elo)
   ]));
 }
 function doExport(){
@@ -2268,8 +2652,8 @@ function setupPWA(){
     '</svg>';
   var iconData = 'data:image/svg+xml,' + encodeURIComponent(iconSvg);
   var manifest = {
-    name:'Lola · Bridge Mentor', short_name:'Lola',
-    description:'Aprende y practica bridge con Lola, tu mentora offline',
+    name:'Lola v4 · Bridge Mentor', short_name:'Lola v4',
+    description:'Aprende y practica bridge con Lola v4, tu mentora offline',
     start_url:'.', display:'standalone', background_color:'#0f0f1a', theme_color:'#0f0f1a',
     orientation:'portrait',
     icons:[{src:iconData, sizes:'512x512', type:'image/svg+xml', purpose:'any maskable'}]
